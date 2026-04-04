@@ -1,13 +1,15 @@
 # Documentation
 
-Canonical docs for **service-manager-read-mcp** live in this directory. The root [README.md](../README.md) is the short product overview; use the links below for install, contribution, and operations.
+Canonical documentation for **service-manager-read-mcp** lives in this directory. The root [README.md](../README.md) is a short entrypoint with links here only.
 
 ## Start here
 
 | Topic | Document |
 | ----- | -------- |
-| Install, MCP clients, `go install` | [distribution.md](distribution.md) |
-| Tools, backends, detection (overview) | [README.md](../README.md) § MCP server & backends |
+| **MCP tools**, stdio rules, tool table, build/install summary | [mcp-tools.md](mcp-tools.md) |
+| Install, MCP clients, `go install`, release-style builds | [distribution.md](distribution.md) |
+| Scope, PATH detection, systemd / launchd / OpenRC details | [supervisors.md](supervisors.md) |
+| Repository tree, local dev commands | [repository-layout.md](repository-layout.md) |
 | Architecture & backend contract | [architecture.md](architecture.md) |
 | “Failed” semantics per supervisor | [failed-services.md](failed-services.md) |
 | Recent logs / journal limits | [recent-logs.md](recent-logs.md) |

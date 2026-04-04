@@ -6,7 +6,7 @@ This project ships as a **single static Go binary** (`service-manager-read-mcp`)
 
 - A **stdio MCP server**: the process speaks [Model Context Protocol](https://modelcontextprotocol.io/) JSON-RPC on **stdin/stdout**. **Do not** attach a terminal to stdout or pipe unrelated data there.
 - **stderr** is reserved for server logs (text). MCP clients should still spawn the process with stderr available (or discard it); protocol traffic never uses stderr.
-- **Configuration**: none required. Discovery uses `PATH` and `GOOS` only (see [README](../README.md) and [architecture.md](architecture.md)).
+- **Configuration**: none required. Discovery uses `PATH` and `GOOS` only (see [supervisors.md](supervisors.md) and [architecture.md](architecture.md)).
 - **Supervisor CLIs** (`systemctl`, `launchctl`, etc.) must exist on the host for the corresponding backends to work; the server does not bundle them.
 
 ## Install with Go
@@ -89,5 +89,6 @@ Use an **absolute path** to the binary. Example (shape varies by client):
 
 ## Related docs
 
-- [README.md](../README.md) — tools, platforms, detection table  
+- [mcp-tools.md](mcp-tools.md) — MCP tool table and examples  
+- [supervisors.md](supervisors.md) — scope, detection, backend CLI summaries  
 - [architecture.md](architecture.md) — layering and safety model  
