@@ -25,6 +25,11 @@ func RegisterTools(server *mcp.Server, h *Handler) {
 		Name:        ToolListFailedServices,
 		Description: "List failed or unhealthy services for one supervisor (read-only). Requires supports_list_failed_services in discovery; meaning of 'failed' varies by manager—see project docs.",
 	}, listFailedServicesHandler(h))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        ToolGetRecentServiceLogs,
+		Description: "Bounded, non-streaming service log tail (read-only). Requires supports_get_recent_logs; max_lines capped at 500. No follow mode. recent_window is reserved and currently unsupported—use line tail only. See docs/recent-logs.md.",
+	}, getRecentServiceLogsHandler(h))
 }
 
 func listServiceManagersHandler(h *Handler) mcp.ToolHandlerFor[ListServiceManagersParams, ListServiceManagersResult] {
@@ -68,5 +73,22 @@ func listFailedServicesHandler(h *Handler) mcp.ToolHandlerFor[ListFailedServices
 			return nil, ListFailedServicesResult{}, err
 		}
 		return nil, ListFailedServicesResult{Failed: failed}, nil
+	}
+}
+
+func getRecentServiceLogsHandler(h *Handler) mcp.ToolHandlerFor[GetRecentServiceLogsParams, GetRecentServiceLogsResult] {
+	return func(ctx context.Context, _ *mcp.CallToolRequest, in GetRecentServiceLogsParams) (*mcp.CallToolResult, GetRecentServiceLogsResult, error) {
+		if strings.TrimSpace(in.Manager) == "" {
+			return nil, GetRecentServiceLogsResult{}, fmt.Errorf("%w: manager is required", svcerr.ErrInvalidArgument)
+		}
+		mgr, err := ParseServiceManager(in.Manager)
+		if err != nil {
+			return nil, GetRecentServiceLogsResult{}, err
+		}
+		out, err := h.GetRecentServiceLogs(ctx, mgr, in.Service, in.MaxLines, in.RecentWindow)
+		if err != nil {
+			return nil, GetRecentServiceLogsResult{}, err
+		}
+		return nil, out, nil
 	}
 }

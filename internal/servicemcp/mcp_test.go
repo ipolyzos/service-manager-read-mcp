@@ -38,9 +38,10 @@ func TestRegisterTools_toolMetadata(t *testing.T) {
 	defer session.Close()
 
 	want := map[string]bool{
-		ToolListServiceManagers: false,
-		ToolListUnits:           false,
-		ToolListFailedServices:  false,
+		ToolListServiceManagers:  false,
+		ToolListUnits:            false,
+		ToolListFailedServices:   false,
+		ToolGetRecentServiceLogs: false,
 	}
 	for tool, err := range session.Tools(ctx, nil) {
 		if err != nil {
@@ -360,5 +361,149 @@ func TestRegisterTools_listFailedServicesNotFoundManagerString(t *testing.T) {
 	}
 	if !res.IsError {
 		t.Fatal("expected tool error for invalid manager")
+	}
+}
+
+func TestRegisterTools_getRecentServiceLogsUnsupportedCapability(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	h := NewHandler(Options{
+		DetectHook: func(context.Context, detect.Environment) detect.Report {
+			return reportLinuxSystemd(domain.BackendCapabilities{
+				SupportsListUnits:  true,
+				SupportsRecentLogs: false,
+			})
+		},
+	})
+	srv := mcp.NewServer(&mcp.Implementation{Name: "test", Version: "v0"}, nil)
+	RegisterTools(srv, h)
+
+	st, ct := mcp.NewInMemoryTransports()
+	if _, err := srv.Connect(ctx, st, nil); err != nil {
+		t.Fatal(err)
+	}
+	client := mcp.NewClient(&mcp.Implementation{Name: "c", Version: "v0"}, nil)
+	session, err := client.Connect(ctx, ct, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+
+	res, err := session.CallTool(ctx, &mcp.CallToolParams{
+		Name: ToolGetRecentServiceLogs,
+		Arguments: map[string]any{
+			"manager":   "systemd",
+			"service":   "nginx.service",
+			"max_lines": 10,
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.IsError {
+		t.Fatal("expected tool error when logs unsupported")
+	}
+}
+
+func TestRegisterTools_getRecentServiceLogsSuccess(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	h := NewHandler(Options{
+		DetectHook: func(context.Context, detect.Environment) detect.Report {
+			return reportLinuxSystemd(domain.BackendCapabilities{
+				SupportsListUnits:  true,
+				SupportsRecentLogs: true,
+			})
+		},
+		NewBackend: func(domain.ServiceManager) (backend.ServiceManagerBackend, error) {
+			return &recordingBackend{
+				caps: domain.BackendCapabilities{
+					Manager:            domain.ManagerSystemd,
+					SupportsRecentLogs: true,
+				},
+				logs: []domain.RecentLogEntry{{Line: "hello"}},
+			}, nil
+		},
+	})
+	srv := mcp.NewServer(&mcp.Implementation{Name: "test", Version: "v0"}, nil)
+	RegisterTools(srv, h)
+
+	st, ct := mcp.NewInMemoryTransports()
+	if _, err := srv.Connect(ctx, st, nil); err != nil {
+		t.Fatal(err)
+	}
+	client := mcp.NewClient(&mcp.Implementation{Name: "c", Version: "v0"}, nil)
+	session, err := client.Connect(ctx, ct, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+
+	res, err := session.CallTool(ctx, &mcp.CallToolParams{
+		Name: ToolGetRecentServiceLogs,
+		Arguments: map[string]any{
+			"manager":   "systemd",
+			"service":   "nginx.service",
+			"max_lines": 25,
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.IsError {
+		t.Fatalf("tool error: %#v", res)
+	}
+	raw, err := json.Marshal(res.StructuredContent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var out GetRecentServiceLogsResult
+	if err := json.Unmarshal(raw, &out); err != nil {
+		t.Fatal(err)
+	}
+	if len(out.Logs) != 1 || out.Logs[0].Line != "hello" || out.EffectiveMaxLines != 25 {
+		t.Fatalf("unexpected out: %#v", out)
+	}
+}
+
+func TestRegisterTools_getRecentServiceLogsRecentWindowRejected(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	h := NewHandler(Options{
+		DetectHook: func(context.Context, detect.Environment) detect.Report {
+			return reportLinuxSystemd(domain.BackendCapabilities{
+				SupportsListUnits:  true,
+				SupportsRecentLogs: true,
+			})
+		},
+	})
+	srv := mcp.NewServer(&mcp.Implementation{Name: "test", Version: "v0"}, nil)
+	RegisterTools(srv, h)
+
+	st, ct := mcp.NewInMemoryTransports()
+	if _, err := srv.Connect(ctx, st, nil); err != nil {
+		t.Fatal(err)
+	}
+	client := mcp.NewClient(&mcp.Implementation{Name: "c", Version: "v0"}, nil)
+	session, err := client.Connect(ctx, ct, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+
+	res, err := session.CallTool(ctx, &mcp.CallToolParams{
+		Name: ToolGetRecentServiceLogs,
+		Arguments: map[string]any{
+			"manager":       "systemd",
+			"service":       "nginx.service",
+			"max_lines":     10,
+			"recent_window": "30m",
+		},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.IsError {
+		t.Fatal("expected unsupported error for recent_window")
 	}
 }
