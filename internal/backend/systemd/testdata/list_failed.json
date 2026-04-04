@@ -1,0 +1,9 @@
+[
+  {
+    "unit": "broken.service",
+    "load": "loaded",
+    "active": "failed",
+    "sub": "failed",
+    "description": "broken"
+  }
+]
