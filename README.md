@@ -46,6 +46,30 @@ Package `internal/backend/systemd` implements `ServiceManagerBackend` using **`s
 
 **Parsing:** list/failed output expects `systemctl` JSON (array or `{ "units": [...] }`). Journal lines use `-o short-iso`; severities are left as `unknown`. Hosts need compatible systemd/journald versions; failures surface as invocation or parse errors.
 
+## Runit backend
+
+Package `internal/backend/runit` implements `ServiceManagerBackend` via **`runit.New()`** using allowlisted **`sv`** plus a **read-only directory listing** of the runit service tree (names are immediate children of the scan directory).
+
+| Operation | Mechanism (summarized) |
+| --------- | ------------------------ |
+| `DetectServiceManager` | `sv -v` stdout must look like **runit** (not BusyBox); rejects ambiguous `sv` implementations |
+| `ListUnits` | `os.ReadDir` on **`SVDIR`** if set and valid, else first of `/var/service`, `/service`, `/etc/service`; `Unit.State` is **`unknown`** until `GetServiceStatus` |
+| `GetServiceStatus` | `sv status <name>` with subprocess **`Dir`** set to the resolved service directory |
+| `ListFailedServices` | One `sv status` per listed service; **heuristic:** line matching `down: <name>: … want up` (supervise wants the service up but it is down) |
+| `GetRecentServiceLogs` | **`ErrUnsupported`** — no bounded, allowlisted per-service log tail via `sv`; `SupportsRecentLogs` is **false** |
+
+### Semantic gaps vs systemd
+
+| Topic | systemd | runit (`sv`) |
+| ----- | -------- | ------------- |
+| Unit list source | `systemctl` JSON | **Filesystem directory** + name validation; not the same as “all units systemd knows” |
+| List row state | Load/active/sub states | **`unknown`** until a status call |
+| Status | `systemctl show` properties | Heuristic parse of **`sv status`** text; PID from `(pid N)` when present |
+| Failed services | Explicit failed units | **`down … want up` only** — ignores clean “down, normally up” and does not see other failure classes |
+| Logs | Bounded `journalctl` | Not exposed here |
+
+`ListFailedServices` may be **slow** on large service directories because it runs **`sv status` once per service**.
+
 ## Project layout
 
 ```
@@ -58,6 +82,7 @@ internal/
   backend/                      # ServiceManagerBackend interface
   backend/stub/                 # noop backend for wiring tests
   backend/systemd/              # systemd/journald backend (allowlisted CLIs)
+  backend/runit/                # runit backend (allowlisted sv + service dir scan)
 ```
 
 ## Development
@@ -74,7 +99,7 @@ Subprocess execution for backends is routed through `internal/runner`: build an 
 
 ## Status
 
-Domain model, backend interface, allowlisted subprocess runner, PATH-based supervisor detection, a stub backend, and a **systemd** backend (library only) are in place. MCP stdio wiring and other supervisor backends are not implemented yet.
+Domain model, backend interface, allowlisted subprocess runner, PATH-based supervisor detection, a stub backend, **systemd**, and **runit** backends (library only) are in place. MCP stdio wiring and other supervisor backends are not implemented yet.
 
 ## License
 
