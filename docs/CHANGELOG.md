@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Move long-form README content into **docs/** ([mcp-tools.md](mcp-tools.md), [supervisors.md](supervisors.md), [repository-layout.md](repository-layout.md)); root **README.md** is pointers only. Refresh [docs/README.md](README.md) hub.
+
 ### Fixed
 
 ## [0.1.3] — 2026-04-04
