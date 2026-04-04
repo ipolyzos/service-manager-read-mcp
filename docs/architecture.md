@@ -41,7 +41,7 @@
 - **Registry:** argv construction, unknown IDs, arity, and parameter validation (table-driven).
 - **SafeRunner:** delegates to `Func` to assert the resolved `Spec` and to assert context deadlines propagate.
 - **Exec:** uses tiny POSIX utilities when present (`true`, `false`, `echo`, `yes`, `sleep`) plus `readLimited` unit tests for capture logic.
-- **MCP:** `internal/servicemcp` tests use in-memory transports for tool listing, schema presence, `tools/call`, and structured JSON outputs; `cmd/service-manager-read-mcp` has a short stdio smoke test (EOF stdin).
+- **MCP:** `internal/servicemcp` tests use in-memory transports for tool listing, schema presence, `tools/call`, and structured JSON outputs; `cmd/service-manager-read-mcp` has a short stdio smoke test (EOF stdin); `internal/e2e` drives `cmd/service-manager-read-mcp-e2e` over real stdio with a fake backend.
 
 ## Distribution
 
@@ -49,4 +49,8 @@ This repository is distributed as a **single Go binary** (no runtime beyond supe
 
 ## Related decisions
 
-See `docs/adr/` for language choice, backend abstraction, and the read-only safety model.
+Recorded in [docs/adr/README.md](adr/README.md) (read-only CLI model, stdio MCP, and ADR process).
+
+## Releases and changelog
+
+Maintainers: [docs/releasing.md](releasing.md). User-visible history: [CHANGELOG.md](../CHANGELOG.md).

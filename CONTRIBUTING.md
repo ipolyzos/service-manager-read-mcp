@@ -14,9 +14,15 @@ Thank you for your interest in **service-manager-read-mcp**.
 
 `main` is used for stable releases. Changes integrate on `develop` and are promoted to `main` when cutting a release.
 
+Steps, tagging, and `go install`: **[docs/releasing.md](docs/releasing.md)**. Update **[CHANGELOG.md](CHANGELOG.md)** before tagging. Prefer a green **`make ci`** locally when preparing a release.
+
 ## Distribution
 
 End-user install options, stdio MCP usage, `go install`, and **`make build-release`** are documented in **[docs/distribution.md](docs/distribution.md)**.
+
+## Security
+
+Report vulnerabilities per **[SECURITY.md](SECURITY.md)** (not public issues for undisclosed problems).
 
 ## Conduct
 
@@ -41,6 +47,8 @@ For parity with CI:
 ```bash
 go test -race ./...
 ```
+
+Full static + build + test parity (requires **golangci-lint** on `PATH`): **`make ci`** or **`./scripts/ci.sh`** — see **[docs/agents.md](docs/agents.md)**.
 
 ## License
 

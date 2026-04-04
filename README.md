@@ -6,11 +6,13 @@ The server is designed to be **safe by default**: it does not start, stop, or re
 
 **Install, versioning, and MCP client setup:** see **[docs/distribution.md](docs/distribution.md)**.
 
+**Changelog:** [CHANGELOG.md](CHANGELOG.md) · **Release process:** [docs/releasing.md](docs/releasing.md) · **Security:** [SECURITY.md](SECURITY.md)
+
 ## MCP server (stdio)
 
 The binary **`service-manager-read-mcp`** runs on **stdin/stdout** via the [Go MCP SDK](https://github.com/modelcontextprotocol/go-sdk). **JSON-RPC uses stdout only**; **stderr** is for server logs. Do not wrap stdout in a PTY or mix other streams into it.
 
-**Client spawn rule:** use **`args`: `[]`** (or omit `args`). Flags such as **`-version`** are only for humans and exit without starting MCP.
+**Client spawn rule:** use **`args`: `[]`** (or omit `args`). **`-version`** is only for humans and exits without starting MCP.
 
 Tools return structured JSON (`structuredContent`). Call **`list_service_managers`** first to see which supervisors are on `PATH` and which `supports_*` capabilities apply.
 
@@ -52,6 +54,14 @@ make build
 ./bin/service-manager-read-mcp -version
 ./bin/service-manager-read-mcp
 ```
+
+After the first **semver tag**, install with:
+
+```bash
+go install github.com/ipolyzos/service-manager-read-mcp/cmd/service-manager-read-mcp@latest
+```
+
+(See [docs/releasing.md](docs/releasing.md) for tagging.)
 
 ### Development and CI
 
@@ -167,8 +177,11 @@ Package `internal/backend/openrc` implements `ServiceManagerBackend` via **`open
 
 ```
 cmd/service-manager-read-mcp/   # MCP stdio entrypoint (+ integration smoke test)
+cmd/service-manager-read-mcp-e2e/ # test-only stdio server (deterministic fake backend)
 internal/
+  e2e/                          # MCP stdio e2e tests (subprocess + CommandTransport)
   servicemcp/                   # MCP tool schemas, handlers, RegisterTools, RunStdio
+  servicemcp/e2etest/           # deterministic fake backend for e2e binary
   version/                      # binary & MCP implementation version metadata
   domain/                       # shared types (units, status, logs, capabilities)
   svcerr/                       # typed errors for backends and runners
@@ -189,6 +202,10 @@ Requires [Go 1.25+](https://go.dev/dl/) for the MCP SDK.
 
 ```bash
 make build
+<<<<<<< HEAD
+=======
+make build-all
+>>>>>>> origin/chore/release-readiness
 go test ./...
 go vet ./...
 ```
@@ -197,7 +214,7 @@ Subprocess execution for backends is routed through `internal/runner`: build an 
 
 ## Status
 
-MCP **stdio server** exposes **`list_service_managers`**, **`list_units`**, **`list_failed_services`**, **`get_service_status`**, and **`get_recent_service_logs`** (capability-gated per supervisor). Library backends (**systemd**, **launchd**, **OpenRC**, **runit**, **Homebrew services**) and allowlisted execution are the only path to host CLIs. See [docs/distribution.md](docs/distribution.md) for install and release notes.
+MCP **stdio server** exposes **`list_service_managers`**, **`list_units`**, **`list_failed_services`**, **`get_service_status`**, and **`get_recent_service_logs`** (capability-gated per supervisor). Library backends (**systemd**, **launchd**, **OpenRC**, **runit**, **Homebrew services**) and allowlisted execution are the only path to host CLIs. Install: [docs/distribution.md](docs/distribution.md). Releases: [docs/releasing.md](docs/releasing.md). Architecture decisions: [docs/adr/README.md](docs/adr/README.md).
 
 ## License
 
@@ -205,4 +222,4 @@ Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). The project uses a [Code of Conduct](CODE_OF_CONDUCT.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). The project uses a [Code of Conduct](CODE_OF_CONDUCT.md) and documents [security reporting](SECURITY.md).
