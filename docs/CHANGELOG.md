@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Document **GitHub Pull Request**–only integration: topic branch → **`develop`**, then **`develop` → `main`** for releases (see [contributing.md](contributing.md), [releasing.md](releasing.md), [agents.md](agents.md)).
+
 ### Fixed
 
 ## [0.1.2] — 2026-04-04
