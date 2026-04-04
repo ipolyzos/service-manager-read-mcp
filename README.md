@@ -53,6 +53,14 @@ make build
 ./bin/service-manager-read-mcp
 ```
 
+After the first **semver tag**, install with:
+
+```bash
+go install github.com/ipolyzos/service-manager-read-mcp/cmd/service-manager-read-mcp@latest
+```
+
+(See [docs/releasing.md](docs/releasing.md) for tagging.)
+
 ### Development and CI
 
 Local checks aligned with GitHub Actions: **`make ci`** or **`./scripts/ci.sh`** (needs **[golangci-lint](https://golangci-lint.run/welcome/install/)** on `PATH`). See **[CONTRIBUTING.md](CONTRIBUTING.md)** for focused targets (`make test-short`, `make test-smoke`) and **[docs/agents.md](docs/agents.md)** for the full step list.
@@ -167,7 +175,9 @@ Package `internal/backend/openrc` implements `ServiceManagerBackend` via **`open
 
 ```
 cmd/service-manager-read-mcp/   # MCP stdio entrypoint (+ integration smoke test)
+cmd/service-manager-read-mcp-e2e/ # test-only stdio server (deterministic fake backend)
 internal/
+  e2e/                          # MCP stdio e2e tests (subprocess + CommandTransport)
   servicemcp/                   # MCP tool schemas, handlers, RegisterTools, RunStdio
   version/                      # binary & MCP implementation version metadata
   domain/                       # shared types (units, status, logs, capabilities)
@@ -205,4 +215,4 @@ Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). The project uses a [Code of Conduct](CODE_OF_CONDUCT.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md). The project uses a [Code of Conduct](CODE_OF_CONDUCT.md) and documents [security reporting](SECURITY.md).

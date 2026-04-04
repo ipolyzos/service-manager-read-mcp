@@ -42,6 +42,8 @@ For parity with CI:
 go test -race ./...
 ```
 
+Full static + build + test parity (requires **golangci-lint** on `PATH`): **`make ci`** or **`./scripts/ci.sh`** — see **[docs/agents.md](docs/agents.md)**.
+
 ## License
 
 By contributing, you agree that your contributions are licensed under the Apache License 2.0, the same license as the project. See [LICENSE](LICENSE) and [NOTICE](NOTICE).

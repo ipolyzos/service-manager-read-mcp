@@ -1,10 +1,16 @@
-.PHONY: ci build test test-short test-smoke vet fmt-check mod-verify
+.PHONY: ci build build-all test test-short test-smoke vet fmt-check mod-verify
 
 # Full local check suite (matches CI intent; requires golangci-lint on PATH).
 ci:
 	./scripts/ci.sh
 
+# Installable binary under bin/ (gitignored).
 build:
+	mkdir -p bin
+	go build -o bin/service-manager-read-mcp ./cmd/service-manager-read-mcp
+
+# Compile all packages (matches CI `go build ./...`).
+build-all:
 	go build ./...
 
 # Race + short: skips TestCLI_stdioSmoke in cmd/service-manager-read-mcp.
