@@ -20,26 +20,23 @@ All participants are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md
 
 ## Testing
 
-Requires Go **1.25+** (see [go.mod](go.mod)).
-
-**Full suite (matches CI intent):** install [golangci-lint](https://golangci-lint.run/welcome/install/), then from the repo root:
+From the repository root (requires Go **1.25+**, same as [go.mod](go.mod)):
 
 ```bash
-make ci
-# or: ./scripts/ci.sh
+go test ./...
 ```
 
-That runs, in order: `gofmt` check, `go mod verify`, `go mod tidy` drift check, `go vet ./...`, `golangci-lint run`, `go build ./...`, unit tests with `-race -short`, then the stdio subprocess smoke test (`TestCLI_stdioSmoke` in `cmd/service-manager-read-mcp`).
-
-**Focused commands:**
+Stdio MCP end-to-end coverage (builds `cmd/service-manager-read-mcp-e2e`, then drives it over stdin/stdout with the official MCP client transport):
 
 ```bash
-make test-short   # race + -short (skips stdio smoke)
-make test-smoke   # only TestCLI_stdioSmoke
+go test ./internal/e2e/...
+```
+
+For parity with CI:
+
+```bash
 go test -race ./...
 ```
-
-Automation and maintainer notes: [docs/agents.md](docs/agents.md).
 
 ## License
 

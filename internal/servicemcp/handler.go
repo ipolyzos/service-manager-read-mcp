@@ -133,6 +133,27 @@ func (h *Handler) ListFailedServices(ctx context.Context, manager domain.Service
 	return sortFailedServiceEntries(entries), nil
 }
 
+// GetServiceStatus returns normalized status for one unit. Input id is validated per supervisor rules before any backend call.
+func (h *Handler) GetServiceStatus(ctx context.Context, manager domain.ServiceManager, id string) (domain.ServiceStatus, error) {
+	if err := ctx.Err(); err != nil {
+		return domain.ServiceStatus{}, err
+	}
+	if err := h.requireManager(ctx, manager, func(c domain.BackendCapabilities) bool {
+		return c.SupportsGetServiceStatus
+	}, "get_service_status"); err != nil {
+		return domain.ServiceStatus{}, err
+	}
+	if err := validateServiceIdentifier(manager, id); err != nil {
+		return domain.ServiceStatus{}, err
+	}
+	be, err := h.backendFor(manager)
+	if err != nil {
+		return domain.ServiceStatus{}, err
+	}
+	id = strings.TrimSpace(id)
+	return be.GetServiceStatus(ctx, domain.UnitRef{Manager: manager, ID: id})
+}
+
 // GetRecentServiceLogs returns a bounded, non-streaming tail of log lines for one service.
 // No follow mode and no unbounded reads: max_lines is clamp-validated by [ParseRecentLogsBounds];
 // outputs may be truncated defensively if a backend returns more lines than requested.
