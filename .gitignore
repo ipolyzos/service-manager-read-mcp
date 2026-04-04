@@ -1,0 +1,39 @@
+# Binaries
+/bin/
+/dist/
+/build/
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Test and coverage
+*.out
+*.test
+coverage.out
+coverage.html
+*.coverprofile
+
+# Go
+vendor/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Editors and IDEs
+*.swp
+*.swo
+*~
+.idea/
+.vscode/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug and local tooling
+__debug_bin
+*.log
