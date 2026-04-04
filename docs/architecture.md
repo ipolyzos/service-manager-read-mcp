@@ -33,7 +33,8 @@
 | `internal/backend/brew` | Allowlisted `brew` for `services list/info --json`; logs unsupported. |
 | `internal/backend` (other) | Any future supervisors map domain operations to `CommandID` + params. |
 | `internal/servicemcp` | MCP tool schemas and handlers (`list_service_managers`, `list_units`, `list_failed_services`, `get_service_status`, `get_recent_service_logs`); uses [github.com/modelcontextprotocol/go-sdk](https://github.com/modelcontextprotocol/go-sdk) with `StdioTransport`. Failed rows are sorted for stable output; see [docs/failed-services.md](failed-services.md). Log reads are line-bounded with MCP-side validation; see [docs/recent-logs.md](recent-logs.md). |
-| `cmd/service-manager-read-mcp` | Process entry: `RunStdio` (logs to stderr; JSON-RPC on stdout). |
+| `internal/version` | Release metadata (`Version`, `Commit`, `BuildDate`) and `MCPVersion()` for MCP `implementation.version`; see [docs/distribution.md](distribution.md). |
+| `cmd/service-manager-read-mcp` | Process entry: `RunStdio` (logs to stderr; JSON-RPC on stdout); `-version` uses `internal/version.Summary`. |
 
 ## Testing strategy
 
@@ -41,6 +42,10 @@
 - **SafeRunner:** delegates to `Func` to assert the resolved `Spec` and to assert context deadlines propagate.
 - **Exec:** uses tiny POSIX utilities when present (`true`, `false`, `echo`, `yes`, `sleep`) plus `readLimited` unit tests for capture logic.
 - **MCP:** `internal/servicemcp` tests use in-memory transports for tool listing, schema presence, `tools/call`, and structured JSON outputs; `cmd/service-manager-read-mcp` has a short stdio smoke test (EOF stdin); `internal/e2e` drives `cmd/service-manager-read-mcp-e2e` over real stdio with a fake backend.
+
+## Distribution
+
+This repository is distributed as a **single Go binary** (no runtime beyond supervisor CLIs on `PATH`). Install, stdio MCP expectations, and release metadata are documented in [distribution.md](distribution.md).
 
 ## Related decisions
 

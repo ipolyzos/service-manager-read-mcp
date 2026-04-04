@@ -4,11 +4,13 @@ A **stdio** [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) ser
 
 The server is designed to be **safe by default**: it does not start, stop, or reconfigure services. It wraps common service-manager command-line interfaces so agents and tools can query status and metadata in a consistent shape across platforms.
 
-**Changelog:** [CHANGELOG.md](CHANGELOG.md) · **Release process:** [docs/releasing.md](docs/releasing.md) · **Security:** [SECURITY.md](SECURITY.md)
+**Install, versioning, and MCP client setup:** see **[docs/distribution.md](docs/distribution.md)**.
 
 ## MCP server (stdio)
 
-The binary **`service-manager-read-mcp`** runs on **stdin/stdout** via the [Go MCP SDK](https://github.com/modelcontextprotocol/go-sdk). **JSON-RPC uses stdout only**; **stderr** is for logs. MCP clients should use **`args`: `[]`** so stdin/stdout stay dedicated to the protocol.
+The binary **`service-manager-read-mcp`** runs on **stdin/stdout** via the [Go MCP SDK](https://github.com/modelcontextprotocol/go-sdk). **JSON-RPC uses stdout only**; **stderr** is for server logs. Do not wrap stdout in a PTY or mix other streams into it.
+
+**Client spawn rule:** use **`args`: `[]`** (or omit `args`). Flags such as **`-version`** are only for humans and exit without starting MCP.
 
 Tools return structured JSON (`structuredContent`). Call **`list_service_managers`** first to see which supervisors are on `PATH` and which `supports_*` capabilities apply.
 
@@ -41,12 +43,13 @@ If discovery reports `supports_list_failed_services: false` for that manager, th
 }
 ```
 
-### Build and run
+### Installation and usage (summary)
 
 Requires **[Go 1.25+](https://go.dev/dl/)** (MCP SDK).
 
 ```bash
 make build
+./bin/service-manager-read-mcp -version
 ./bin/service-manager-read-mcp
 ```
 
@@ -64,7 +67,7 @@ Local checks aligned with GitHub Actions: **`make ci`** or **`./scripts/ci.sh`**
 
 ### IDE configuration (example)
 
-Point your MCP client at the built binary (absolute path). Example shape:
+Point your MCP client at the built binary (**absolute path**). Keep **`args`** empty so stdin/stdout stay dedicated to JSON-RPC:
 
 ```json
 {
@@ -77,7 +80,7 @@ Point your MCP client at the built binary (absolute path). Example shape:
 }
 ```
 
-Adjust keys to match your client (Cursor, Claude Desktop, etc.).
+Adjust keys to match your client (Cursor, Claude Desktop, etc.). More detail: [docs/distribution.md](docs/distribution.md).
 
 ## Scope (planned)
 
@@ -176,7 +179,7 @@ cmd/service-manager-read-mcp-e2e/ # test-only stdio server (deterministic fake b
 internal/
   e2e/                          # MCP stdio e2e tests (subprocess + CommandTransport)
   servicemcp/                   # MCP tool schemas, handlers, RegisterTools, RunStdio
-  servicemcp/e2etest/           # deterministic fake backend for e2e binary
+  version/                      # binary & MCP implementation version metadata
   domain/                       # shared types (units, status, logs, capabilities)
   svcerr/                       # typed errors for backends and runners
   runner/                       # argv-only subprocess runner (+ test fake)
@@ -196,7 +199,6 @@ Requires [Go 1.25+](https://go.dev/dl/) for the MCP SDK.
 
 ```bash
 make build
-make build-all
 go test ./...
 go vet ./...
 ```
@@ -205,7 +207,7 @@ Subprocess execution for backends is routed through `internal/runner`: build an 
 
 ## Status
 
-MCP **stdio server** exposes **`list_service_managers`**, **`list_units`**, **`list_failed_services`**, **`get_service_status`**, and **`get_recent_service_logs`** (each gated by discovery capabilities). Library backends (**systemd**, **launchd**, **OpenRC**, **runit**, **Homebrew services**) and allowlisted execution are the only path to host CLIs. Architecture decisions: [docs/adr/README.md](docs/adr/README.md).
+MCP **stdio server** exposes **`list_service_managers`**, **`list_units`**, **`list_failed_services`**, **`get_service_status`**, and **`get_recent_service_logs`** (capability-gated per supervisor). Library backends (**systemd**, **launchd**, **OpenRC**, **runit**, **Homebrew services**) and allowlisted execution are the only path to host CLIs. See [docs/distribution.md](docs/distribution.md) for install and release notes.
 
 ## License
 
