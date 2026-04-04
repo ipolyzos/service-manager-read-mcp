@@ -30,17 +30,23 @@ func (b *Backend) Capabilities() domain.BackendCapabilities {
 
 // DetectServiceManager implements backend.ServiceManagerBackend.
 func (b *Backend) DetectServiceManager(ctx context.Context) (domain.ServiceManager, error) {
+	if err := ctx.Err(); err != nil {
+		return domain.ManagerUnknown, err
+	}
 	if !b.Available {
 		return domain.ManagerUnknown, svcerr.ErrBackendUnavailable
 	}
 	if b.Manager == "" {
-		return domain.ManagerUnknown, nil
+		return domain.ManagerUnknown, svcerr.ErrBackendUnavailable
 	}
 	return b.Manager, nil
 }
 
 // ListUnits implements backend.ServiceManagerBackend.
 func (b *Backend) ListUnits(ctx context.Context, in domain.ListUnitsInput) ([]domain.Unit, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if !b.Available {
 		return nil, svcerr.ErrBackendUnavailable
 	}
@@ -49,6 +55,9 @@ func (b *Backend) ListUnits(ctx context.Context, in domain.ListUnitsInput) ([]do
 
 // GetServiceStatus implements backend.ServiceManagerBackend.
 func (b *Backend) GetServiceStatus(ctx context.Context, ref domain.UnitRef) (domain.ServiceStatus, error) {
+	if err := ctx.Err(); err != nil {
+		return domain.ServiceStatus{}, err
+	}
 	if !b.Available {
 		return domain.ServiceStatus{}, svcerr.ErrBackendUnavailable
 	}
@@ -57,6 +66,9 @@ func (b *Backend) GetServiceStatus(ctx context.Context, ref domain.UnitRef) (dom
 
 // ListFailedServices implements backend.ServiceManagerBackend.
 func (b *Backend) ListFailedServices(ctx context.Context) ([]domain.FailedServiceEntry, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if !b.Available {
 		return nil, svcerr.ErrBackendUnavailable
 	}
@@ -65,6 +77,9 @@ func (b *Backend) ListFailedServices(ctx context.Context) ([]domain.FailedServic
 
 // GetRecentServiceLogs implements backend.ServiceManagerBackend.
 func (b *Backend) GetRecentServiceLogs(ctx context.Context, ref domain.UnitRef, in domain.RecentLogsInput) ([]domain.RecentLogEntry, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	if !b.Available {
 		return nil, svcerr.ErrBackendUnavailable
 	}
