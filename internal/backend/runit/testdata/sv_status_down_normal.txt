@@ -1,0 +1,1 @@
+down: cron: 3s, normally up

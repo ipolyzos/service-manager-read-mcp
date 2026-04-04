@@ -55,7 +55,7 @@
         "supports_detect": true,
         "supports_list_units": true,
         "supports_get_service_status": true,
-        "supports_list_failed_services": false,
+        "supports_list_failed_services": true,
         "supports_get_recent_logs": false
       }
     },
