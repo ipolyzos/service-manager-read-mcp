@@ -41,6 +41,7 @@ func TestRegisterTools_toolMetadata(t *testing.T) {
 		ToolListServiceManagers:  false,
 		ToolListUnits:            false,
 		ToolListFailedServices:   false,
+		ToolGetServiceStatus:     false,
 		ToolGetRecentServiceLogs: false,
 	}
 	for tool, err := range session.Tools(ctx, nil) {

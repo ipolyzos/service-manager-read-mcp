@@ -7,10 +7,11 @@ import (
 
 // MCP tool names (underscore form per MCP naming conventions).
 const (
-	ToolListServiceManagers  = "list_service_managers"
-	ToolListUnits            = "list_units"
-	ToolListFailedServices   = "list_failed_services"
-	ToolGetRecentServiceLogs = "get_recent_service_logs"
+	ToolListServiceManagers   = "list_service_managers"
+	ToolListUnits             = "list_units"
+	ToolListFailedServices    = "list_failed_services"
+	ToolGetServiceStatus      = "get_service_status"
+	ToolGetRecentServiceLogs  = "get_recent_service_logs"
 )
 
 // ListServiceManagersParams is the input schema for [ToolListServiceManagers].
@@ -40,6 +41,17 @@ type ListFailedServicesParams struct {
 // ListFailedServicesResult is the structured output for [ToolListFailedServices].
 type ListFailedServicesResult struct {
 	Failed []domain.FailedServiceEntry `json:"failed"`
+}
+
+// GetServiceStatusParams is the input schema for [ToolGetServiceStatus].
+type GetServiceStatusParams struct {
+	Manager string `json:"manager" jsonschema:"Supervisor: systemd, launchd, openrc, runit, brew_services (or brew)"`
+	ID      string `json:"id" jsonschema:"Unit/service id for that supervisor (validated per backend argv rules)"`
+}
+
+// GetServiceStatusResult is the structured output for [ToolGetServiceStatus].
+type GetServiceStatusResult struct {
+	Status domain.ServiceStatus `json:"status"`
 }
 
 // GetRecentServiceLogsParams is the input schema for [ToolGetRecentServiceLogs].

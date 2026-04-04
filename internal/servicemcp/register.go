@@ -27,6 +27,11 @@ func RegisterTools(server *mcp.Server, h *Handler) {
 	}, listFailedServicesHandler(h))
 
 	mcp.AddTool(server, &mcp.Tool{
+		Name:        ToolGetServiceStatus,
+		Description: "Read normalized status for a single unit (read-only). Requires supports_get_service_status; id is validated per supervisor before any backend call.",
+	}, getServiceStatusHandler(h))
+
+	mcp.AddTool(server, &mcp.Tool{
 		Name:        ToolGetRecentServiceLogs,
 		Description: "Bounded, non-streaming service log tail (read-only). Requires supports_get_recent_logs; max_lines capped at 500. No follow mode. recent_window is reserved and currently unsupported—use line tail only. See docs/recent-logs.md.",
 	}, getRecentServiceLogsHandler(h))
@@ -73,6 +78,26 @@ func listFailedServicesHandler(h *Handler) mcp.ToolHandlerFor[ListFailedServices
 			return nil, ListFailedServicesResult{}, err
 		}
 		return nil, ListFailedServicesResult{Failed: failed}, nil
+	}
+}
+
+func getServiceStatusHandler(h *Handler) mcp.ToolHandlerFor[GetServiceStatusParams, GetServiceStatusResult] {
+	return func(ctx context.Context, _ *mcp.CallToolRequest, in GetServiceStatusParams) (*mcp.CallToolResult, GetServiceStatusResult, error) {
+		if strings.TrimSpace(in.Manager) == "" {
+			return nil, GetServiceStatusResult{}, fmt.Errorf("%w: manager is required", svcerr.ErrInvalidArgument)
+		}
+		if strings.TrimSpace(in.ID) == "" {
+			return nil, GetServiceStatusResult{}, fmt.Errorf("%w: id is required", svcerr.ErrInvalidArgument)
+		}
+		mgr, err := ParseServiceManager(in.Manager)
+		if err != nil {
+			return nil, GetServiceStatusResult{}, err
+		}
+		st, err := h.GetServiceStatus(ctx, mgr, in.ID)
+		if err != nil {
+			return nil, GetServiceStatusResult{}, err
+		}
+		return nil, GetServiceStatusResult{Status: st}, nil
 	}
 }
 
