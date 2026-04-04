@@ -17,6 +17,7 @@
 
 | Layer | Responsibility |
 | ----- | ---------------- |
+| `internal/detect` | `GOOS`-gated `exec.LookPath` discovery for known supervisor CLIs; emits `Report` with `Finding` + `BackendCapabilities` templates. No subprocess execution. |
 | `runner.Registry` / `SafeRunner` | Map `Invocation` → validated `Spec`; sole supported entry for untrusted inputs. |
 | `runner.Runner` (`Exec`, `Func`) | Execute `Spec`; `Func` is the test double. |
 | `internal/backend` (future) | Map domain operations to `CommandID` + params; parse stdout/stderr into domain structs. |
