@@ -5,13 +5,17 @@ import (
 	"time"
 )
 
-// Spec describes an argv-only subprocess (no shell).
+// Spec describes an argv-only subprocess (no shell). Callers that must enforce allowlists should build Spec
+// only through Registry.Build; SafeRunner is the supported entrypoint for that path.
 type Spec struct {
 	Path    string
 	Args    []string
 	Dir     string
 	Env     []string
 	Timeout time.Duration
+	// MaxStdoutBytes and MaxStderrBytes bound captured output per stream. Zero lets Exec apply DefaultMaxStreamBytes.
+	MaxStdoutBytes int
+	MaxStderrBytes int
 }
 
 // Result captures bounded process output and exit status.
