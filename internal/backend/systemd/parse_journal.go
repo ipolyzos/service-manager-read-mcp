@@ -23,6 +23,10 @@ func ParseJournalShortISO(stdout []byte, unit domain.UnitRef) ([]domain.RecentLo
 		if line == "" {
 			continue
 		}
+		// journalctl prints this when -u filter matches nothing (not short-iso).
+		if line == "-- No entries --" {
+			continue
+		}
 		ent, err := parseJournalLine(line, unit)
 		if err != nil {
 			return nil, err
@@ -41,13 +45,17 @@ func parseJournalLine(line string, unit domain.UnitRef) (domain.RecentLogEntry, 
 		return domain.RecentLogEntry{}, svcerr.ErrParse
 	}
 	tsRaw, _, msg := parts[0], parts[1], parts[2]
-	ts, err := parseJournalTimestamp(tsRaw)
-	if err != nil {
-		return domain.RecentLogEntry{}, err
+	var ts *time.Time
+	if tsRaw != "" && tsRaw != "--" {
+		t, err := parseJournalTimestamp(tsRaw)
+		if err != nil {
+			return domain.RecentLogEntry{}, err
+		}
+		ts = &t
 	}
 	u := unit
 	return domain.RecentLogEntry{
-		Timestamp: &ts,
+		Timestamp: ts,
 		Line:      msg,
 		Severity:  domain.LogSeverityUnknown,
 		Unit:      &u,
