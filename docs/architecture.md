@@ -32,7 +32,7 @@
 | `internal/backend/runit` | Allowlisted `sv` (`-v`, `status <name>`); service-dir scan for list; logs unsupported. |
 | `internal/backend/brew` | Allowlisted `brew` for `services list/info --json`; logs unsupported. |
 | `internal/backend` (other) | Any future supervisors map domain operations to `CommandID` + params. |
-| `internal/servicemcp` | MCP tool schemas and handlers (`list_service_managers`, `list_units`); uses [github.com/modelcontextprotocol/go-sdk](https://github.com/modelcontextprotocol/go-sdk) with `StdioTransport`. |
+| `internal/servicemcp` | MCP tool schemas and handlers (`list_service_managers`, `list_units`, `list_failed_services`); uses [github.com/modelcontextprotocol/go-sdk](https://github.com/modelcontextprotocol/go-sdk) with `StdioTransport`. Failed rows are sorted for stable output; see [docs/failed-services.md](failed-services.md). |
 | `cmd/service-manager-read-mcp` | Process entry: `RunStdio` (logs to stderr; JSON-RPC on stdout). |
 
 ## Testing strategy
