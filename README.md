@@ -70,6 +70,27 @@ Package `internal/backend/launchd` implements `ServiceManagerBackend` via **`lau
 
 Correctness prefers **honest mapping** and documented limits over forcing identical semantics.
 
+## OpenRC backend
+
+Package `internal/backend/openrc` implements `ServiceManagerBackend` via **`openrc.New()`** using allowlisted **`rc-service`** and **`rc-status`** only.
+
+| Operation | CLI (summarized) |
+| --------- | ---------------- |
+| `DetectServiceManager` | `rc-service -V` (expects “OpenRC” in stdout) |
+| `ListUnits` | `rc-service -l` (one name per line) |
+| `GetServiceStatus` | `rc-service <name> status` (stdout+stderr scanned for started/stopped/crashed) |
+| `ListFailedServices` | `rc-status --crashed` (OpenRC **≥ ~0.45**; older releases return an invocation error) |
+| `GetRecentServiceLogs` | **`ErrUnsupported`** — no safe per-service log tail; `SupportsRecentLogs` is **false** |
+
+### Differences vs systemd
+
+| Topic | systemd | OpenRC (`rc-service`) |
+| ----- | -------- | --------------------- |
+| Listing | JSON with load/active/sub | **Names only**; `Unit.State` is **`unknown`** until `GetServiceStatus` |
+| Status | Structured `systemctl show` | Heuristic string match on `status` output; non-zero exit may still mean “stopped” (handled) |
+| Failed | `systemctl` failed units | **`rc-status --crashed`** only — not the same as systemd’s failure model |
+| Logs | `journalctl` | Not implemented here |
+
 ## Project layout
 
 ```
@@ -83,6 +104,7 @@ internal/
   backend/stub/                 # noop backend for wiring tests
   backend/systemd/              # systemd/journald backend (allowlisted CLIs)
   backend/launchd/              # launchd backend (allowlisted launchctl)
+  backend/openrc/               # OpenRC backend (rc-service / rc-status)
 ```
 
 ## Development
@@ -99,7 +121,7 @@ Subprocess execution for backends is routed through `internal/runner`: build an 
 
 ## Status
 
-Domain model, backend interface, allowlisted subprocess runner, PATH-based supervisor detection, a stub backend, **systemd** and **launchd** backends (library only) are in place. MCP stdio wiring and remaining supervisors are not implemented yet.
+Domain model, backend interface, allowlisted subprocess runner, PATH-based supervisor detection, a stub backend, **systemd**, **launchd**, and **OpenRC** backends (library only) are in place. MCP stdio wiring and remaining supervisors are not implemented yet.
 
 ## License
 
