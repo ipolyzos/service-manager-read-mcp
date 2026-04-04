@@ -13,6 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [0.1.7] — 2026-04-04
+
+### Changed
+
+- **GitHub Actions**: Dependabot grouped update — newer pinned SHAs for **actions/checkout** and **actions/setup-go** in **`.github/workflows/ci-verify.yml`** and **`.github/workflows/release.yml`**.
+
+### Fixed
+
+- **[recent-logs.md](recent-logs.md)**: clarify that **`recent_window`** is only effective when empty or **`0`**; non-zero values are validated then rejected as **unsupported** until a safe time filter exists.
+
 ## [0.1.6] — 2026-04-04
 
 ### Added
@@ -84,7 +94,8 @@ First public release: stdio MCP server for **read-only** service supervisor stat
 - CI (build + race tests), `make ci` / `scripts/ci.sh`, and stdio subprocess smoke plus `internal/e2e` MCP client tests.
 - Security policy, changelog, `docs/releasing.md`, `docs/distribution.md`, `internal/version`, and architecture decision records (`docs/adr/`).
 
-[Unreleased]: https://github.com/ipolyzos/service-manager-read-mcp/compare/v0.1.6...HEAD
+[Unreleased]: https://github.com/ipolyzos/service-manager-read-mcp/compare/v0.1.7...HEAD
+[0.1.7]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.7
 [0.1.6]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.6
 [0.1.5]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.5
 [0.1.4]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.4
