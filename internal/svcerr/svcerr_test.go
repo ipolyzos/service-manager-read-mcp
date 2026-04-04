@@ -15,6 +15,9 @@ func TestSentinels(t *testing.T) {
 		svcerr.ErrUnsupported,
 		svcerr.ErrParse,
 		svcerr.ErrInvocation,
+		svcerr.ErrNotAllowlisted,
+		svcerr.ErrInvalidArgument,
+		svcerr.ErrOutputLimit,
 	}
 	for _, err := range cases {
 		if err == nil || err.Error() == "" {

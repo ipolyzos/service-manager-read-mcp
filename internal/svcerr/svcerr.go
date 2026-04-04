@@ -13,6 +13,9 @@ var (
 	ErrUnsupported        = errors.New("operation unsupported")
 	ErrParse              = errors.New("parse error")
 	ErrInvocation         = errors.New("command invocation failed")
+	ErrNotAllowlisted     = errors.New("command not allowlisted")
+	ErrInvalidArgument    = errors.New("invalid invocation argument")
+	ErrOutputLimit        = errors.New("command output exceeded capture limit")
 )
 
 // InvocationError records a completed subprocess that failed or could not start as expected.
