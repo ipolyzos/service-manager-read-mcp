@@ -14,9 +14,41 @@ Thank you for your interest in **service-manager-read-mcp**.
 
 `main` is used for stable releases. Changes integrate on `develop` and are promoted to `main` when cutting a release.
 
+Steps, tagging, and `go install`: **[docs/releasing.md](docs/releasing.md)**. Update **[CHANGELOG.md](CHANGELOG.md)** before tagging. Prefer a green **`make ci`** locally when preparing a release.
+
+## Distribution
+
+End-user install options, stdio MCP usage, `go install`, and **`make build-release`** are documented in **[docs/distribution.md](docs/distribution.md)**.
+
+## Security
+
+Report vulnerabilities per **[SECURITY.md](SECURITY.md)** (not public issues for undisclosed problems).
+
 ## Conduct
 
 All participants are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Testing
+
+From the repository root (requires Go **1.25+**, same as [go.mod](go.mod)):
+
+```bash
+go test ./...
+```
+
+Stdio MCP end-to-end coverage (builds `cmd/service-manager-read-mcp-e2e`, then drives it over stdin/stdout with the official MCP client transport):
+
+```bash
+go test ./internal/e2e/...
+```
+
+For parity with CI:
+
+```bash
+go test -race ./...
+```
+
+Full static + build + test parity (requires **golangci-lint** on `PATH`): **`make ci`** or **`./scripts/ci.sh`** — see **[docs/agents.md](docs/agents.md)**.
 
 ## License
 

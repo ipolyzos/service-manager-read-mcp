@@ -1,0 +1,16 @@
+[
+  {
+    "name": "dbus",
+    "service_name": "homebrew.dbus",
+    "running": false,
+    "loaded": false,
+    "schedulable": false,
+    "pid": null,
+    "exit_code": null,
+    "user": null,
+    "status": "none",
+    "file": "/home/linuxbrew/.linuxbrew/opt/dbus/homebrew.dbus.service",
+    "registered": false,
+    "loaded_file": null
+  }
+]

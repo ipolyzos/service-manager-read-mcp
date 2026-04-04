@@ -1,0 +1,8 @@
+Id=nginx.service
+ActiveState=active
+SubState=running
+LoadState=loaded
+UnitFileState=enabled
+Description=nginx HTTP server
+MainPID=1234
+FragmentPath=/lib/systemd/system/nginx.service

@@ -12,3 +12,12 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+Third-party components (see go.mod)
+------------------------------------
+This module depends on third-party packages, including:
+
+- github.com/modelcontextprotocol/go-sdk (MIT License)
+- github.com/google/jsonschema-go (BSD-3-Clause)
+
+See each module’s repository for full license text.
