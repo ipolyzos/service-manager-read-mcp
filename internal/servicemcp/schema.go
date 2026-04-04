@@ -7,11 +7,11 @@ import (
 
 // MCP tool names (underscore form per MCP naming conventions).
 const (
-	ToolListServiceManagers   = "list_service_managers"
-	ToolListUnits             = "list_units"
-	ToolListFailedServices    = "list_failed_services"
-	ToolGetServiceStatus      = "get_service_status"
-	ToolGetRecentServiceLogs  = "get_recent_service_logs"
+	ToolListServiceManagers  = "list_service_managers"
+	ToolListUnits            = "list_units"
+	ToolListFailedServices   = "list_failed_services"
+	ToolGetServiceStatus     = "get_service_status"
+	ToolGetRecentServiceLogs = "get_recent_service_logs"
 )
 
 // ListServiceManagersParams is the input schema for [ToolListServiceManagers].

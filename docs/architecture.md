@@ -32,7 +32,7 @@
 | `internal/backend/runit` | Allowlisted `sv` (`-v`, `status <name>`); service-dir scan for list; logs unsupported. |
 | `internal/backend/brew` | Allowlisted `brew` for `services list/info --json`; logs unsupported. |
 | `internal/backend` (other) | Any future supervisors map domain operations to `CommandID` + params. |
-| `internal/servicemcp` | MCP tool schemas and handlers (`list_service_managers`, `list_units`, `list_failed_services`, `get_recent_service_logs`); uses [github.com/modelcontextprotocol/go-sdk](https://github.com/modelcontextprotocol/go-sdk) with `StdioTransport`. Failed rows are sorted for stable output; see [docs/failed-services.md](failed-services.md). Log reads are line-bounded with MCP-side validation; see [docs/recent-logs.md](recent-logs.md). |
+| `internal/servicemcp` | MCP tool schemas and handlers (`list_service_managers`, `list_units`, `list_failed_services`, `get_service_status`, `get_recent_service_logs`); uses [github.com/modelcontextprotocol/go-sdk](https://github.com/modelcontextprotocol/go-sdk) with `StdioTransport`. Failed rows are sorted for stable output; see [docs/failed-services.md](failed-services.md). Log reads are line-bounded with MCP-side validation; see [docs/recent-logs.md](recent-logs.md). |
 | `cmd/service-manager-read-mcp` | Process entry: `RunStdio` (logs to stderr; JSON-RPC on stdout). |
 
 ## Testing strategy
@@ -40,8 +40,12 @@
 - **Registry:** argv construction, unknown IDs, arity, and parameter validation (table-driven).
 - **SafeRunner:** delegates to `Func` to assert the resolved `Spec` and to assert context deadlines propagate.
 - **Exec:** uses tiny POSIX utilities when present (`true`, `false`, `echo`, `yes`, `sleep`) plus `readLimited` unit tests for capture logic.
-- **MCP:** `internal/servicemcp` tests use in-memory transports for tool listing, schema presence, `tools/call`, and structured JSON outputs; `cmd/service-manager-read-mcp` has a short stdio smoke test (EOF stdin).
+- **MCP:** `internal/servicemcp` tests use in-memory transports for tool listing, schema presence, `tools/call`, and structured JSON outputs; `cmd/service-manager-read-mcp` has a short stdio smoke test (EOF stdin); `internal/e2e` drives `cmd/service-manager-read-mcp-e2e` over real stdio with a fake backend.
 
 ## Related decisions
 
-See `docs/adr/` for language choice, backend abstraction, and the read-only safety model.
+Recorded in [docs/adr/README.md](adr/README.md) (read-only CLI model, stdio MCP, and ADR process).
+
+## Releases and changelog
+
+Maintainers: [docs/releasing.md](releasing.md). User-visible history: [CHANGELOG.md](../CHANGELOG.md).

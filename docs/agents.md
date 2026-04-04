@@ -4,20 +4,17 @@
 
 Open pull requests against **`develop`**. **`main`** tracks stable releases.
 
-## CI parity
+## CI vs local checks
 
-GitHub Actions (`.github/workflows/ci.yml`) mirrors **`make ci`** / **`./scripts/ci.sh`**:
+**GitHub Actions** (`.github/workflows/ci.yml`) on push/PR to `main` and `develop`:
 
-| Step | Command / action |
-| ---- | ---------------- |
-| Format | `gofmt -l .` must be empty |
-| Modules | `go mod verify`; `go mod tidy` then no diff on `go.mod` / `go.sum` |
-| Vet | `go vet ./...` |
-| Lint | `golangci-lint run ./...` (see `.golangci.yml`) |
+| Step | Command |
+| ---- | ------- |
 | Build | `go build ./...` |
-| Unit | `go test -race -short ./...` (skips stdio smoke in `cmd/service-manager-read-mcp`) |
-| Stdio smoke | `go test -race ./cmd/service-manager-read-mcp -run '^TestCLI_stdioSmoke$'` |
+| Test | `go test -race ./...` |
 
-**Build**, **unit**, and **stdio smoke** run on **ubuntu-latest** and **macos-latest** after **static** succeeds (`needs: static`), so formatter or lint failures skip matrix work.
+**Local `make ci`** / **`./scripts/ci.sh`** is stricter: `gofmt`, `go mod verify`, `go mod tidy` check, `go vet`, `golangci-lint`, `go build ./...`, `go test -race -short ./...`, then the stdio smoke test. Run it before release prep or when changing Go code.
 
-The **static** job runs only on Ubuntu to keep signal fast and avoid duplicating lint downloads.
+## Releases
+
+See [releasing.md](releasing.md) and root [CHANGELOG.md](../CHANGELOG.md).

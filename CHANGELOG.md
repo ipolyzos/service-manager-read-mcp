@@ -23,6 +23,7 @@ First public release: stdio MCP server for **read-only** service supervisor stat
 - Backends: systemd, launchd, OpenRC, runit, Homebrew services (`internal/backend/*`) via allowlisted `internal/runner`.
 - PATH-based discovery (`internal/detect`) without invoking supervisor CLIs during detection.
 - CI (build + race tests), `make ci` / `scripts/ci.sh`, and stdio subprocess smoke plus `internal/e2e` MCP client tests.
+- `SECURITY.md`, `CHANGELOG.md`, `docs/releasing.md`, and architecture decision records (`docs/adr/`).
 
 [Unreleased]: https://github.com/ipolyzos/service-manager-read-mcp/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.0
