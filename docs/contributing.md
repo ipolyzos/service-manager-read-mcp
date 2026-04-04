@@ -6,15 +6,15 @@ Thank you for your interest in **service-manager-read-mcp**.
 
 - Open issues for bugs and feature discussion before large changes when practical.
 - Use short-lived branches with one of these prefixes: `feature/`, `bugfix/`, or `chore/`.
-- Open pull requests against the **`develop`** branch (not `main`).
+- **Do not push commits directly to `develop` or `main`.** Push your topic branch and open a **GitHub Pull Request** into **`develop`** so required CI runs and review can happen.
 - Keep changes small, focused, and easy to review.
 - Update user-facing documentation when behavior, configuration, or packaging changes (see **[docs/README.md](README.md)** for the doc map).
 
 ## Releases
 
-`main` is used for stable releases. Changes integrate on `develop` and are promoted to `main` when cutting a release.
+`main` is used for stable releases. Work merges into **`develop`** via PR; when cutting a release, promote **`develop` → `main`** with a **GitHub Pull Request** as well (then tag on **`main`** after that merge). See **[releasing.md](releasing.md)**.
 
-Steps, tagging, and `go install`: **[releasing.md](releasing.md)**. Update **[CHANGELOG.md](CHANGELOG.md)** before tagging. Prefer a green **`make ci`** locally when preparing a release.
+Steps, tagging, and `go install`: **[releasing.md](releasing.md)**. Update **[CHANGELOG.md](CHANGELOG.md)** on your PR branch before the release PR merges. Prefer a green **`make ci`** locally when preparing a release.
 
 ## Distribution
 

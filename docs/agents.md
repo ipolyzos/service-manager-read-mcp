@@ -2,7 +2,8 @@
 
 ## Branch flow
 
-Open pull requests against **`develop`**. **`main`** tracks stable releases.
+- Land work with a **GitHub Pull Request** into **`develop`** from `feature/*`, `bugfix/*`, or `chore/*` (no direct pushes to **`develop`** / **`main`**).
+- Promote releases with a **Pull Request** from **`develop`** into **`main`**, then tag on **`main`** (see [releasing.md](releasing.md)).
 
 ## CI vs local checks
 
