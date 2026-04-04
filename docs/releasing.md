@@ -27,7 +27,7 @@ Lightweight process for tagging **semver** releases. The integration line is **`
    go install github.com/ipolyzos/service-manager-read-mcp/cmd/service-manager-read-mcp@vX.Y.Z
    ```
 
-5. **Optional:** create a [GitHub Release](https://github.com/ipolyzos/service-manager-read-mcp/releases) from the tag and paste the changelog section for that version.
+5. **GitHub Release (automated):** pushing the tag triggers **`.github/workflows/release.yml`**, which runs the same checks as branch CI (**`ci-verify.yml`**) and then creates a [GitHub Release](https://github.com/ipolyzos/service-manager-read-mcp/releases) with **`gh release create --generate-notes`**. If that job fails, fix the branch or tag state and push a new tag (or delete/recreate the release per GitHub docs). You can still edit the release notes in the UI to paste the matching section from [CHANGELOG.md](CHANGELOG.md).
 
 ## After the first tag
 

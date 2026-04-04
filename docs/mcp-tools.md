@@ -53,7 +53,7 @@ go install github.com/ipolyzos/service-manager-read-mcp/cmd/service-manager-read
 
 (See [releasing.md](releasing.md) for tagging.)
 
-**GitHub Actions** runs the same sequence as **`make ci`** / **`./scripts/ci.sh`** (see **[agents.md](agents.md)**). Locally you need **[golangci-lint](https://golangci-lint.run/welcome/install/)** on `PATH`. See **[contributing.md](contributing.md)** for focused targets (`make test-short`, `make test-smoke`).
+**GitHub Actions** runs **`ci-verify.yml`** (see **[agents.md](agents.md)**)—the same sequence as **`make ci`** / **`./scripts/ci.sh`**. Locally you need **[golangci-lint](https://golangci-lint.run/welcome/install/)** on **`PATH`** at the version in **`scripts/golangci-version`**. See **[contributing.md](contributing.md)** for toolchain alignment and focused targets (`make test-short`, `make test-smoke`).
 
 ## MCP client configuration
 
@@ -61,6 +61,6 @@ Use an **absolute path** and empty **`args`**. Full examples and version metadat
 
 ## See also
 
-- [supervisors.md](supervisors.md) — planned scope, PATH detection, per-backend CLI details  
-- [architecture.md](architecture.md) — layering and safety model  
+- [supervisors.md](supervisors.md) — planned scope, PATH detection, per-backend CLI details
+- [architecture.md](architecture.md) — layering and safety model
 - [README.md](../README.md) — repository entrypoint (pointers only)

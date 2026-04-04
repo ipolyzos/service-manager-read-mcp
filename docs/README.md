@@ -19,7 +19,8 @@ Canonical documentation for **service-manager-read-mcp** lives in this directory
 | Topic | Document |
 | ----- | -------- |
 | Branch flow, CI vs local, release prep context | [agents.md](agents.md) |
-| Semver tags, `go install @vX.Y.Z`, GitHub Release | [releasing.md](releasing.md) |
+| Semver tags, `go install @vX.Y.Z`, tag → GitHub Release workflow | [releasing.md](releasing.md) |
+| Dependabot (weekly Go + Actions PRs) | [`.github/dependabot.yml`](../.github/dependabot.yml) (config only) |
 | Version history | [CHANGELOG.md](CHANGELOG.md) |
 | Architecture decision records | [adr/README.md](adr/README.md) |
 
