@@ -6,9 +6,9 @@ The server is designed to be **safe by default**: it does not start, stop, or re
 
 ## MCP server (stdio)
 
-The binary **`service-manager-read-mcp`** runs an MCP server on **stdin/stdout** using the official [Go MCP SDK](https://github.com/modelcontextprotocol/go-sdk). **JSON-RPC traffic uses stdout only**; logs go to **stderr**.
+The binary **`service-manager-read-mcp`** runs on **stdin/stdout** via the [Go MCP SDK](https://github.com/modelcontextprotocol/go-sdk). Protocol JSON-RPC uses **stdout**; logs use **stderr**.
 
-Initial tools (structured JSON via `structuredContent`):
+Tools return structured JSON (`structuredContent`). Call **`list_service_managers`** first to see which supervisors are on `PATH` and which `supports_*` capabilities apply.
 
 | Tool | Input | Output |
 | ---- | ----- | ------ |
@@ -22,7 +22,7 @@ Initial tools (structured JSON via `structuredContent`):
 `list_failed_services` arguments example:
 
 ```json
-{ "manager": "systemd" }
+{ "manager": "systemd", "limit": 200 }
 ```
 
 If discovery reports `supports_list_failed_services: false` for that manager, the tool returns a clear **unsupported** error (read-only; no shell).

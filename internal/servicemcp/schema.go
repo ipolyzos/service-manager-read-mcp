@@ -23,8 +23,8 @@ type ListServiceManagersResult struct {
 
 // ListUnitsParams is the input schema for [ToolListUnits].
 type ListUnitsParams struct {
-	Manager string `json:"manager" jsonschema:"Supervisor: systemd, launchd, openrc, runit, brew_services (or brew)"`
-	Limit   int    `json:"limit,omitempty" jsonschema:"Optional maximum units to return; 1–10000, or 0 for backend default"`
+	Manager string `json:"manager" jsonschema:"Required. Supervisor key: systemd | launchd | openrc | runit | brew_services | brew. Call list_service_managers first."`
+	Limit   int    `json:"limit,omitempty" jsonschema:"Optional. Max units (0 = backend default). Range 0–10000."`
 }
 
 // ListUnitsResult is the structured output for [ToolListUnits].
@@ -34,7 +34,7 @@ type ListUnitsResult struct {
 
 // ListFailedServicesParams is the input schema for [ToolListFailedServices].
 type ListFailedServicesParams struct {
-	Manager string `json:"manager" jsonschema:"Supervisor: systemd, launchd, openrc, runit, brew_services (or brew)"`
+	Manager string `json:"manager" jsonschema:"Required. Supervisor key: systemd | launchd | openrc | runit | brew_services | brew. Call list_service_managers first."`
 }
 
 // ListFailedServicesResult is the structured output for [ToolListFailedServices].
