@@ -10,8 +10,9 @@ Lightweight process for tagging **semver** releases. The integration line is **`
 
 ## Steps
 
-1. Merge or fast-forward **`main`** from **`develop`** (per project policy).
-2. **Tag** the release commit on `main`:
+1. Promote **`develop` → `main`** via **GitHub Pull Request** (base **`main`**, compare **`develop`**). Merge only after required checks are green. **Do not** `git push` straight to **`main`** to skip CI.
+2. Locally: `git checkout main && git pull` so you tag the same commit GitHub merged.
+3. **Tag** the release commit on `main`:
 
    ```bash
    git tag -a vX.Y.Z -m "Release vX.Y.Z"
@@ -20,13 +21,13 @@ Lightweight process for tagging **semver** releases. The integration line is **`
 
    Use **annotated** tags so `git describe` and tooling see a real release.
 
-3. **Module consumers** can install with:
+4. **Module consumers** can install with:
 
    ```bash
    go install github.com/ipolyzos/service-manager-read-mcp/cmd/service-manager-read-mcp@vX.Y.Z
    ```
 
-4. **Optional:** create a [GitHub Release](https://github.com/ipolyzos/service-manager-read-mcp/releases) from the tag and paste the changelog section for that version.
+5. **Optional:** create a [GitHub Release](https://github.com/ipolyzos/service-manager-read-mcp/releases) from the tag and paste the changelog section for that version.
 
 ## After the first tag
 
