@@ -39,7 +39,9 @@ type Policy struct {
 	FixedArgs []string
 	Params    []ParamRule
 	// SuffixArgs are appended after Params (e.g. trailing --property= flags for systemctl show).
-	SuffixArgs     []string
+	SuffixArgs []string
+	// BetweenParams holds argv fragments emitted after each param except the last (e.g. "-u" between -n COUNT and UNIT).
+	BetweenParams  [][]string
 	DefaultTimeout time.Duration
 	// MaxStdoutBytes and MaxStderrBytes bound each stream; zero applies DefaultMaxStreamBytes at build time.
 	MaxStdoutBytes int
@@ -99,7 +101,17 @@ func (r *Registry) Build(inv Invocation) (Spec, error) {
 			return Spec{}, fmt.Errorf("%w: %s: %v", svcerr.ErrInvalidArgument, name, err)
 		}
 	}
-	args := append(append([]string{}, p.FixedArgs...), inv.Params...)
+	if len(p.BetweenParams) != 0 && len(p.BetweenParams) != len(inv.Params)-1 {
+		return Spec{}, fmt.Errorf("runner: policy %q: between-params must have length len(params)-1", p.ID)
+	}
+
+	args := append([]string{}, p.FixedArgs...)
+	for i, par := range inv.Params {
+		args = append(args, par)
+		if i < len(p.BetweenParams) {
+			args = append(args, p.BetweenParams[i]...)
+		}
+	}
 	if len(p.SuffixArgs) > 0 {
 		args = append(args, p.SuffixArgs...)
 	}
