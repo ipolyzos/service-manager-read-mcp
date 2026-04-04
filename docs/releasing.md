@@ -14,8 +14,8 @@ Lightweight process for tagging **semver** releases. The integration line is **`
 2. **Tag** the release commit on `main`:
 
    ```bash
-   git tag -a v0.1.0 -m "Release v0.1.0"
-   git push origin v0.1.0
+   git tag -a vX.Y.Z -m "Release vX.Y.Z"
+   git push origin vX.Y.Z
    ```
 
    Use **annotated** tags so `git describe` and tooling see a real release.
@@ -23,7 +23,7 @@ Lightweight process for tagging **semver** releases. The integration line is **`
 3. **Module consumers** can install with:
 
    ```bash
-   go install github.com/ipolyzos/service-manager-read-mcp/cmd/service-manager-read-mcp@v0.1.0
+   go install github.com/ipolyzos/service-manager-read-mcp/cmd/service-manager-read-mcp@vX.Y.Z
    ```
 
 4. **Optional:** create a [GitHub Release](https://github.com/ipolyzos/service-manager-read-mcp/releases) from the tag and paste the changelog section for that version.

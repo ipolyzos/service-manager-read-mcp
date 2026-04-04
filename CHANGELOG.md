@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [0.1.1] — 2026-04-04
+
+### Fixed
+
+- Remove stray Git merge conflict markers that were accidentally left in `README.md` (published tree for v0.1.0).
+
 ## [0.1.0] — 2026-04-04
 
 First public release: stdio MCP server for **read-only** service supervisor state on Linux and macOS.
@@ -25,5 +31,6 @@ First public release: stdio MCP server for **read-only** service supervisor stat
 - CI (build + race tests), `make ci` / `scripts/ci.sh`, and stdio subprocess smoke plus `internal/e2e` MCP client tests.
 - `SECURITY.md`, `CHANGELOG.md`, `docs/releasing.md`, `docs/distribution.md`, `internal/version`, and architecture decision records (`docs/adr/`).
 
-[Unreleased]: https://github.com/ipolyzos/service-manager-read-mcp/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/ipolyzos/service-manager-read-mcp/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.1
 [0.1.0]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.0
