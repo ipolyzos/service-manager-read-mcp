@@ -16,9 +16,31 @@ Platform tooling this project intends to wrap (where available on the host):
 | runit                | `sv`        |
 | Homebrew (macOS)     | `brew services` |
 
+## Project layout
+
+```
+cmd/service-manager-read-mcp/   # process entrypoint (MCP wiring pending)
+internal/
+  domain/                       # shared types (units, status, logs, capabilities)
+  svcerr/                       # typed errors for backends and runners
+  runner/                       # argv-only subprocess runner (+ test fake)
+  backend/                      # ServiceManagerBackend interface
+  backend/stub/                 # noop backend for wiring tests
+```
+
+## Development
+
+Requires [Go 1.22+](https://go.dev/dl/).
+
+```bash
+go build -o bin/service-manager-read-mcp ./cmd/service-manager-read-mcp
+go test ./...
+go vet ./...
+```
+
 ## Status
 
-Repository bootstrap only. Implementation, packaging, and documentation for installation and configuration will follow on the integration branch.
+Domain model, backend interface, subprocess runner abstraction, and a stub backend are in place. MCP stdio wiring and real supervisor integrations are not implemented yet.
 
 ## License
 
