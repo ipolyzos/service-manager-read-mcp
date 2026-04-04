@@ -181,7 +181,10 @@ cmd/service-manager-read-mcp-e2e/ # test-only stdio server (deterministic fake b
 internal/
   e2e/                          # MCP stdio e2e tests (subprocess + CommandTransport)
   servicemcp/                   # MCP tool schemas, handlers, RegisterTools, RunStdio
+<<<<<<< HEAD
   servicemcp/e2etest/           # deterministic fake backend for e2e binary
+=======
+>>>>>>> 059bc69f56db2c7e5a46fcb62b4050350d23a37c
   version/                      # binary & MCP implementation version metadata
   domain/                       # shared types (units, status, logs, capabilities)
   svcerr/                       # typed errors for backends and runners
@@ -203,9 +206,12 @@ Requires [Go 1.25+](https://go.dev/dl/) for the MCP SDK.
 ```bash
 make build
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 make build-all
 >>>>>>> origin/chore/release-readiness
+=======
+>>>>>>> 059bc69f56db2c7e5a46fcb62b4050350d23a37c
 go test ./...
 go vet ./...
 ```
@@ -214,7 +220,11 @@ Subprocess execution for backends is routed through `internal/runner`: build an 
 
 ## Status
 
+<<<<<<< HEAD
 MCP **stdio server** exposes **`list_service_managers`**, **`list_units`**, **`list_failed_services`**, **`get_service_status`**, and **`get_recent_service_logs`** (capability-gated per supervisor). Library backends (**systemd**, **launchd**, **OpenRC**, **runit**, **Homebrew services**) and allowlisted execution are the only path to host CLIs. Install: [docs/distribution.md](docs/distribution.md). Releases: [docs/releasing.md](docs/releasing.md). Architecture decisions: [docs/adr/README.md](docs/adr/README.md).
+=======
+MCP **stdio server** exposes **`list_service_managers`**, **`list_units`**, **`list_failed_services`**, **`get_service_status`**, and **`get_recent_service_logs`** (capability-gated per supervisor). Library backends (**systemd**, **launchd**, **OpenRC**, **runit**, **Homebrew services**) and allowlisted execution are the only path to host CLIs. See [docs/distribution.md](docs/distribution.md) for install and release notes.
+>>>>>>> 059bc69f56db2c7e5a46fcb62b4050350d23a37c
 
 ## License
 
