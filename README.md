@@ -46,6 +46,30 @@ Package `internal/backend/systemd` implements `ServiceManagerBackend` using **`s
 
 **Parsing:** list/failed output expects `systemctl` JSON (array or `{ "units": [...] }`). Journal lines use `-o short-iso`; severities are left as `unknown`. Hosts need compatible systemd/journald versions; failures surface as invocation or parse errors.
 
+## Homebrew services backend
+
+Package `internal/backend/brew` implements `ServiceManagerBackend` via **`brew.New()`** using allowlisted **`brew`** only (`--version`, `services list --json`, `services info <formula> --json`). It reflects **the invoking user’s** Homebrew service context (or root’s when the process runs as root)—the same rule as `brew services` itself (launchd user agents vs system, or user systemd units vs system).
+
+| Operation | CLI (summarized) |
+| --------- | ---------------- |
+| `DetectServiceManager` | `brew --version` (expects “Homebrew” in stdout) |
+| `ListUnits` | `brew services list --json` |
+| `GetServiceStatus` | `brew services info <formula> --json` |
+| `ListFailedServices` | Same list JSON; **heuristic:** `status` is `error` (case-insensitive) **or** `exit_code` is non-zero |
+| `GetRecentServiceLogs` | **`ErrUnsupported`** — no bounded, allowlisted per-formula log tail; `SupportsRecentLogs` is **false** |
+
+### Semantic gaps vs systemd
+
+| Topic | systemd | Homebrew `brew services` |
+| ----- | -------- | ------------------------- |
+| Unit identity | Unit names (e.g. `foo.service`) | **Formula names** (e.g. `nginx`, `postgresql@14`) |
+| Scope | Often system-wide | **User vs root** context only; no sudo elevation in this backend |
+| List source | `systemctl` JSON | **`brew services list --json`** (only Homebrew-managed services) |
+| Coarse state | Native load/active | Derived from **`status`** + **`exit_code`**; non-zero **`exit_code` forces `failed`** in list rows even if `status` still says `started` |
+| Failed services | Explicit failed units | **Heuristic** from list JSON only—not launchd/systemd’s full failure model |
+| Detail view | `systemctl show` | **`brew services info`** fields mapped into `ServiceStatus` / `metadata` |
+| Logs | `journalctl` | Not exposed here |
+
 ## Project layout
 
 ```
@@ -58,6 +82,7 @@ internal/
   backend/                      # ServiceManagerBackend interface
   backend/stub/                 # noop backend for wiring tests
   backend/systemd/              # systemd/journald backend (allowlisted CLIs)
+  backend/brew/                 # Homebrew services backend (allowlisted brew)
 ```
 
 ## Development
@@ -74,7 +99,7 @@ Subprocess execution for backends is routed through `internal/runner`: build an 
 
 ## Status
 
-Domain model, backend interface, allowlisted subprocess runner, PATH-based supervisor detection, a stub backend, and a **systemd** backend (library only) are in place. MCP stdio wiring and other supervisor backends are not implemented yet.
+Domain model, backend interface, allowlisted subprocess runner, PATH-based supervisor detection, a stub backend, **systemd**, and **Homebrew services** backends (library only) are in place. MCP stdio wiring and other supervisor backends are not implemented yet.
 
 ## License
 
