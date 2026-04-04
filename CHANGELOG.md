@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **systemd logs:** tolerate `journalctl -o short-iso` output when the timestamp field is `--` (unknown time) and skip the `-- No entries --` sentinel so `get_recent_service_logs` does not fail on empty tails or mixed journal lines.
+
 ## [0.1.1] — 2026-04-04
 
 ### Fixed
