@@ -18,6 +18,29 @@ Thank you for your interest in **service-manager-read-mcp**.
 
 All participants are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
+## Testing
+
+Requires Go **1.25+** (see [go.mod](go.mod)).
+
+**Full suite (matches CI intent):** install [golangci-lint](https://golangci-lint.run/welcome/install/), then from the repo root:
+
+```bash
+make ci
+# or: ./scripts/ci.sh
+```
+
+That runs, in order: `gofmt` check, `go mod verify`, `go mod tidy` drift check, `go vet ./...`, `golangci-lint run`, `go build ./...`, unit tests with `-race -short`, then the stdio subprocess smoke test (`TestCLI_stdioSmoke` in `cmd/service-manager-read-mcp`).
+
+**Focused commands:**
+
+```bash
+make test-short   # race + -short (skips stdio smoke)
+make test-smoke   # only TestCLI_stdioSmoke
+go test -race ./...
+```
+
+Automation and maintainer notes: [docs/agents.md](docs/agents.md).
+
 ## License
 
 By contributing, you agree that your contributions are licensed under the Apache License 2.0, the same license as the project. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
