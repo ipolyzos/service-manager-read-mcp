@@ -11,9 +11,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Move long-form README content into **docs/** ([mcp-tools.md](mcp-tools.md), [supervisors.md](supervisors.md), [repository-layout.md](repository-layout.md)); root **README.md** is pointers only. Refresh [docs/README.md](README.md) hub.
-
 ### Fixed
+
+## [0.1.4] — 2026-04-04
+
+### Changed
+
+- Move long-form README content into **docs/** ([mcp-tools.md](mcp-tools.md), [supervisors.md](supervisors.md), [repository-layout.md](repository-layout.md)); root **README.md** is pointers only. Refresh [docs/README.md](README.md) hub.
 
 ## [0.1.3] — 2026-04-04
 
@@ -55,7 +59,8 @@ First public release: stdio MCP server for **read-only** service supervisor stat
 - CI (build + race tests), `make ci` / `scripts/ci.sh`, and stdio subprocess smoke plus `internal/e2e` MCP client tests.
 - Security policy, changelog, `docs/releasing.md`, `docs/distribution.md`, `internal/version`, and architecture decision records (`docs/adr/`).
 
-[Unreleased]: https://github.com/ipolyzos/service-manager-read-mcp/compare/v0.1.3...HEAD
+[Unreleased]: https://github.com/ipolyzos/service-manager-read-mcp/compare/v0.1.4...HEAD
+[0.1.4]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.4
 [0.1.3]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.3
 [0.1.2]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.2
 [0.1.1]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.1
