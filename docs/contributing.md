@@ -28,6 +28,23 @@ Report vulnerabilities per **[security.md](security.md)** (not public issues for
 
 All participants are expected to follow the [Code of Conduct](code-of-conduct.md).
 
+## Local toolchain (match CI)
+
+Fresh laptops often fail **`make ci`** for two predictable reasons; align with CI before chasing “mystery” failures.
+
+1. **Go version** — Use a Go toolchain **at least as new** as the `go` directive in [go.mod](../go.mod). GitHub Actions uses **`actions/setup-go`** with **`go-version-file: go.mod`**. `./scripts/ci.sh` refuses to run if `go env GOVERSION` is older than the module toolchain.
+
+2. **golangci-lint** — CI installs the version in **[scripts/golangci-version](../scripts/golangci-version)** (also read by **`.github/workflows/ci-verify.yml`**). Install the same build on your machine so local lint matches the PR checks:
+
+   ```bash
+   GOLANGCI="$(tr -d '[:space:]' < scripts/golangci-version)"
+   go install "github.com/golangci/golangci-lint/v2/cmd/golangci-lint@${GOLANGCI}"
+   ```
+
+   Ensure **`$(go env GOPATH)/bin`** is on **`PATH`**. If you see *“Go language version used to build golangci-lint is lower than the targeted Go version”*, your linter binary was compiled with an older Go; rerun **`go install …`** after upgrading Go.
+
+**Dependabot** opens weekly PRs for **Go modules** and **GitHub Actions** (see [`.github/dependabot.yml`](../.github/dependabot.yml)). Bumping the linter in CI requires updating **`scripts/golangci-version`** to the same version.
+
 ## Testing
 
 From the repository root (requires Go **1.25+**, same as [go.mod](../go.mod)):
@@ -48,7 +65,7 @@ Quick test sweep (CI also runs `gofmt`, modules, `vet`, **golangci-lint**, build
 go test -race ./...
 ```
 
-Full static + build + test parity (requires **golangci-lint** on `PATH`): **`make ci`** or **`./scripts/ci.sh`** — see **[agents.md](agents.md)**.
+Full static + build + test parity (requires **golangci-lint** on `PATH`, version pinned in **`scripts/golangci-version`**): **`make ci`** or **`./scripts/ci.sh`** — see **[agents.md](agents.md)**.
 
 To exercise the **real** installed MCP binary against **systemd/journalctl** on your machine (all five tools plus journal edge cases), after `go install` or `make build`:
 

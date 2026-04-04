@@ -6,7 +6,7 @@ COMMIT ?= $(shell git rev-parse --short HEAD 2>/dev/null || echo unknown)
 BUILD_DATE ?= $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
 RELEASE_LDFLAGS := -X '$(VERSION_PKG).Version=$(VERSION)' -X '$(VERSION_PKG).Commit=$(COMMIT)' -X '$(VERSION_PKG).BuildDate=$(BUILD_DATE)'
 
-# Full local check suite (same steps as `.github/workflows/ci.yml`; requires golangci-lint on PATH).
+# Full local check suite (same steps as `.github/workflows/ci-verify.yml`; requires golangci-lint on PATH).
 ci:
 	./scripts/ci.sh
 
