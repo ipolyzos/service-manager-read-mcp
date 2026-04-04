@@ -49,7 +49,7 @@ This repository is distributed as a **single Go binary** (no runtime beyond supe
 
 ## Related decisions
 
-Recorded in [docs/adr/README.md](adr/README.md) (read-only CLI model, stdio MCP, and ADR process).
+Recorded in [adr/README.md](adr/README.md) (read-only CLI model, stdio MCP, and ADR process).
 
 ## Releases and changelog
 
