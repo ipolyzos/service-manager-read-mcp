@@ -3,6 +3,15 @@
 ## Layout
 
 ```
+.github/
+  dependabot.yml                # weekly PRs: Go modules + GitHub Actions
+  workflows/
+    ci.yml                      # push/PR → reusable ci-verify
+    ci-verify.yml               # shared gofmt, modules, vet, lint, build, test
+    release.yml                 # tag v* → ci-verify, then GitHub Release
+scripts/
+  ci.sh                         # local parity with ci-verify (toolchain + lint checks)
+  golangci-version              # single line: golangci-lint version (must match CI)
 cmd/service-manager-read-mcp/   # MCP stdio entrypoint (+ integration smoke test)
 cmd/service-manager-read-mcp-e2e/ # test-only stdio server (deterministic fake backend)
 internal/

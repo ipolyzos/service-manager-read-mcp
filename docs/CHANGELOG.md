@@ -13,6 +13,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [0.1.6] — 2026-04-04
+
+### Added
+
+- **Dependabot** ([`.github/dependabot.yml`](../.github/dependabot.yml)): weekly PRs for **Go modules** and **GitHub Actions** (actions grouped).
+- **Release workflow** ([`.github/workflows/release.yml`](../.github/workflows/release.yml)): on **`v*`** tags, runs **`ci-verify`** then **`gh release create --generate-notes`** (documented in [releasing.md](releasing.md)).
+- **`scripts/golangci-version`**: single source for the **golangci-lint** version used by CI and documented for contributors.
+
+### Changed
+
+- **CI** is factored into a reusable **`.github/workflows/ci-verify.yml`**; **`.github/workflows/ci.yml`** calls it unchanged for contributors.
+- **`./scripts/ci.sh`**: checks **Go** vs **`go.mod`** before lint; prints install hints for the pinned **golangci-lint** on failure.
+- **Docs** — **[contributing.md](contributing.md)** (**Local toolchain**), **[agents.md](agents.md)**, **[repository-layout.md](repository-layout.md)**, **[releasing.md](releasing.md)**, **[mcp-tools.md](mcp-tools.md)**: CI/release layout and automation.
+
 ## [0.1.5] — 2026-04-04
 
 ### Added
@@ -70,7 +84,8 @@ First public release: stdio MCP server for **read-only** service supervisor stat
 - CI (build + race tests), `make ci` / `scripts/ci.sh`, and stdio subprocess smoke plus `internal/e2e` MCP client tests.
 - Security policy, changelog, `docs/releasing.md`, `docs/distribution.md`, `internal/version`, and architecture decision records (`docs/adr/`).
 
-[Unreleased]: https://github.com/ipolyzos/service-manager-read-mcp/compare/v0.1.5...HEAD
+[Unreleased]: https://github.com/ipolyzos/service-manager-read-mcp/compare/v0.1.6...HEAD
+[0.1.6]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.6
 [0.1.5]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.5
 [0.1.4]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.4
 [0.1.3]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.3
