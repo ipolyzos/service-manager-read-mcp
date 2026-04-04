@@ -4,6 +4,12 @@
 
 `service-manager-read-mcp` is a stdio MCP server that answers read-only questions about service state by executing **allowlisted** platform CLIs and normalizing their output into shared domain types. Tool handlers live in `internal/servicemcp` and call `internal/detect` plus `internal/backend/*` only—no ad-hoc subprocesses.
 
+## Threat model (short)
+
+- **In scope:** constrain what an **MCP client** can trigger—only registered `CommandID` invocations with validated parameters, no shell, bounded output and time—so agents get **predictable read-only** supervisor queries instead of arbitrary `exec`.
+- **Out of scope:** this is **not** a host sandbox. Anyone who can run the binary locally can already run `systemctl` (or equivalent); the design assumes you trust the environment where you install and invoke the server.
+- **Residual risk:** backends call real supervisor tooling; supply-chain and parser bugs are mitigated by tests and allowlists but not formally verified here.
+
 ## Command execution boundaries
 
 - **No shell:** the low-level `runner.Exec` backend uses `os/exec` with a resolved binary path and an explicit argv slice only.

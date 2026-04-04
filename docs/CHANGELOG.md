@@ -13,6 +13,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+## [0.1.5] — 2026-04-04
+
+### Added
+
+- **Threat model** blurb on the root **[README.md](../README.md)** and a short **Threat model** section in **[architecture.md](architecture.md)** (read-only scope, no host sandbox, residual risks).
+
+### Changed
+
+- **GitHub Actions** **`.github/workflows/ci.yml`** now matches **`./scripts/ci.sh`** / **`make ci`**: `gofmt`, `go mod verify`, `go mod tidy` with a clean `go.mod`/`go.sum` diff, `go vet`, **golangci-lint** (pinned **v2.11.4**), `go build ./...`, `go test -race -short ./...`, and the stdio smoke test on **`cmd/service-manager-read-mcp`**.
+- **[agents.md](agents.md)**, **[mcp-tools.md](mcp-tools.md)**, **[contributing.md](contributing.md)**, **`scripts/ci.sh`**, and the **Makefile** describe the same CI sequence end-to-end.
+
 ## [0.1.4] — 2026-04-04
 
 ### Changed
@@ -59,7 +70,8 @@ First public release: stdio MCP server for **read-only** service supervisor stat
 - CI (build + race tests), `make ci` / `scripts/ci.sh`, and stdio subprocess smoke plus `internal/e2e` MCP client tests.
 - Security policy, changelog, `docs/releasing.md`, `docs/distribution.md`, `internal/version`, and architecture decision records (`docs/adr/`).
 
-[Unreleased]: https://github.com/ipolyzos/service-manager-read-mcp/compare/v0.1.4...HEAD
+[Unreleased]: https://github.com/ipolyzos/service-manager-read-mcp/compare/v0.1.5...HEAD
+[0.1.5]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.5
 [0.1.4]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.4
 [0.1.3]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.3
 [0.1.2]: https://github.com/ipolyzos/service-manager-read-mcp/releases/tag/v0.1.2
