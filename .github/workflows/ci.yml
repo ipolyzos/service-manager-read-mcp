@@ -49,6 +49,7 @@ jobs:
 
   build:
     name: Build (${{ matrix.os }})
+    needs: static
     strategy:
       fail-fast: false
       matrix:
@@ -66,6 +67,7 @@ jobs:
 
   unit:
     name: Unit tests (${{ matrix.os }})
+    needs: static
     strategy:
       fail-fast: false
       matrix:
@@ -83,6 +85,7 @@ jobs:
 
   integration:
     name: Stdio smoke (${{ matrix.os }})
+    needs: static
     strategy:
       fail-fast: false
       matrix:
