@@ -14,6 +14,10 @@ Thank you for your interest in **service-manager-read-mcp**.
 
 `main` is used for stable releases. Changes integrate on `develop` and are promoted to `main` when cutting a release.
 
+## Distribution
+
+End-user install options, stdio MCP usage, `go install`, and **`make build-release`** are documented in **[docs/distribution.md](docs/distribution.md)**.
+
 ## Conduct
 
 All participants are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).

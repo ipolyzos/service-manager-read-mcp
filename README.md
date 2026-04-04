@@ -4,9 +4,13 @@ A **stdio** [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) ser
 
 The server is designed to be **safe by default**: it does not start, stop, or reconfigure services. It wraps common service-manager command-line interfaces so agents and tools can query status and metadata in a consistent shape across platforms.
 
+**Install, versioning, and MCP client setup:** see **[docs/distribution.md](docs/distribution.md)**.
+
 ## MCP server (stdio)
 
-The binary **`service-manager-read-mcp`** runs on **stdin/stdout** via the [Go MCP SDK](https://github.com/modelcontextprotocol/go-sdk). Protocol JSON-RPC uses **stdout**; logs use **stderr**.
+The binary **`service-manager-read-mcp`** runs on **stdin/stdout** via the [Go MCP SDK](https://github.com/modelcontextprotocol/go-sdk). **JSON-RPC uses stdout only**; **stderr** is for server logs. Do not wrap stdout in a PTY or mix other streams into it.
+
+**Client spawn rule:** use **`args`: `[]`** (or omit `args`). Flags such as **`-version`** are only for humans and exit without starting MCP.
 
 Tools return structured JSON (`structuredContent`). Call **`list_service_managers`** first to see which supervisors are on `PATH` and which `supports_*` capabilities apply.
 
@@ -15,14 +19,15 @@ Tools return structured JSON (`structuredContent`). Call **`list_service_manager
 | `list_service_managers` | _(none)_ | `report` — same shape as [detect.Report](internal/detect/detect.go) (`goos`, `findings[]` with `capabilities`) |
 | `list_units` | `manager` (required): `systemd` \| `launchd` \| `openrc` \| `runit` \| `brew_services` (or `brew`); `limit` (optional, 0–10000) | `units[]` — [domain.Unit](internal/domain/types.go) rows |
 | `list_failed_services` | `manager` (required), same values as `list_units` | `failed[]` — [domain.FailedServiceEntry](internal/domain/types.go); sorted for stable ordering; **meaning of “failed” varies by supervisor** — see [docs/failed-services.md](docs/failed-services.md) |
+| `get_service_status` | `manager` (required), `id` (unit/service id for that supervisor) | `status` — [domain.ServiceStatus](internal/domain/types.go) |
 | `get_recent_service_logs` | `manager`, `service`, `max_lines` (0=default 100, max 500), optional `recent_window` (Go duration; empty/`0` = line tail only) | `logs[]` — [domain.RecentLogEntry](internal/domain/types.go); `effective_max_lines`, optional `truncated`. **Only systemd** has logs today; **non-zero `recent_window` is unsupported** until a safe time filter exists — see [docs/recent-logs.md](docs/recent-logs.md) |
 
-`list_units`, `list_failed_services`, and `get_recent_service_logs` refuse managers that are not **present on `PATH`** for the current OS (see detection table below). Capabilities (`supports_list_failed_services`, `supports_get_recent_logs`, …) come from the same discovery report. All calls go through existing `internal/backend/*` code and the allowlisted runner.
+`list_units`, `list_failed_services`, `get_service_status`, and `get_recent_service_logs` refuse managers that are not **present on `PATH`** for the current OS (see detection table below). Capabilities (`supports_get_service_status`, `supports_list_failed_services`, `supports_get_recent_logs`, …) come from the same discovery report. All calls go through existing `internal/backend/*` code and the allowlisted runner.
 
 `list_failed_services` arguments example:
 
 ```json
-{ "manager": "systemd", "limit": 200 }
+{ "manager": "systemd" }
 ```
 
 If discovery reports `supports_list_failed_services: false` for that manager, the tool returns a clear **unsupported** error (read-only; no shell).
@@ -38,12 +43,13 @@ If discovery reports `supports_list_failed_services: false` for that manager, th
 }
 ```
 
-### Build and run
+### Installation and usage (summary)
 
 Requires **[Go 1.25+](https://go.dev/dl/)** (MCP SDK).
 
 ```bash
-go build -o bin/service-manager-read-mcp ./cmd/service-manager-read-mcp
+make build
+./bin/service-manager-read-mcp -version
 ./bin/service-manager-read-mcp
 ```
 
@@ -53,7 +59,7 @@ Local checks aligned with GitHub Actions: **`make ci`** or **`./scripts/ci.sh`**
 
 ### IDE configuration (example)
 
-Point your MCP client at the built binary (absolute path). Example shape:
+Point your MCP client at the built binary (**absolute path**). Keep **`args`** empty so stdin/stdout stay dedicated to JSON-RPC:
 
 ```json
 {
@@ -66,7 +72,7 @@ Point your MCP client at the built binary (absolute path). Example shape:
 }
 ```
 
-Adjust keys to match your client (Cursor, Claude Desktop, etc.).
+Adjust keys to match your client (Cursor, Claude Desktop, etc.). More detail: [docs/distribution.md](docs/distribution.md).
 
 ## Scope (planned)
 
@@ -163,6 +169,7 @@ Package `internal/backend/openrc` implements `ServiceManagerBackend` via **`open
 cmd/service-manager-read-mcp/   # MCP stdio entrypoint (+ integration smoke test)
 internal/
   servicemcp/                   # MCP tool schemas, handlers, RegisterTools, RunStdio
+  version/                      # binary & MCP implementation version metadata
   domain/                       # shared types (units, status, logs, capabilities)
   svcerr/                       # typed errors for backends and runners
   runner/                       # argv-only subprocess runner (+ test fake)
@@ -181,7 +188,7 @@ internal/
 Requires [Go 1.25+](https://go.dev/dl/) for the MCP SDK.
 
 ```bash
-go build -o bin/service-manager-read-mcp ./cmd/service-manager-read-mcp
+make build
 go test ./...
 go vet ./...
 ```
@@ -190,7 +197,7 @@ Subprocess execution for backends is routed through `internal/runner`: build an 
 
 ## Status
 
-MCP **stdio server** with tools **`list_service_managers`** and **`list_units`** is wired. Library backends (**systemd**, **launchd**, **OpenRC**, **runit**, **Homebrew services**) and allowlisted execution remain the only way to reach host CLIs. Additional MCP tools and supervisors may follow.
+MCP **stdio server** exposes **`list_service_managers`**, **`list_units`**, **`list_failed_services`**, **`get_service_status`**, and **`get_recent_service_logs`** (capability-gated per supervisor). Library backends (**systemd**, **launchd**, **OpenRC**, **runit**, **Homebrew services**) and allowlisted execution are the only path to host CLIs. See [docs/distribution.md](docs/distribution.md) for install and release notes.
 
 ## License
 
