@@ -40,10 +40,9 @@ func (e *InvocationError) Error() string {
 	return b.String()
 }
 
+// Unwrap returns ErrInvocation so errors.Is(..., ErrInvocation) matches.
+// Inspect Cause directly when the underlying start/exit error is needed.
 func (e *InvocationError) Unwrap() error {
-	if e.Cause != nil {
-		return e.Cause
-	}
 	return ErrInvocation
 }
 
