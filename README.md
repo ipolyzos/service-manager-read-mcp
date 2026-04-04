@@ -28,7 +28,9 @@ Platform tooling this project intends to wrap (where available on the host):
 | runit     | `sv`             | Linux, BSDs, macOS (if installed)    |
 | Homebrew  | `brew`           | Linux, macOS (Homebrew installs)     |
 
-Each finding includes a `domain.BackendCapabilities` template describing **planned** read-only surface area once a backend exists; presence on PATH does not imply the MCP server can query it yet.
+Each finding includes a `domain.BackendCapabilities` template describing **planned** read-only surface area for that CLI; for managers with a library backend in this repo, the template is kept consistent with `internal/backend/<name>.Capabilities()`.
+
+Shared rules for all backends (context cancellation, `UnitRef.Manager`, typed errors) live on [`ServiceManagerBackend`](internal/backend/backend.go). See [docs/architecture.md](docs/architecture.md) § *Backend interface contract*.
 
 ## Systemd backend
 
