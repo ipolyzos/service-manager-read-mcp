@@ -15,8 +15,9 @@ Initial tools (structured JSON via `structuredContent`):
 | `list_service_managers` | _(none)_ | `report` — same shape as [detect.Report](internal/detect/detect.go) (`goos`, `findings[]` with `capabilities`) |
 | `list_units` | `manager` (required): `systemd` \| `launchd` \| `openrc` \| `runit` \| `brew_services` (or `brew`); `limit` (optional, 0–10000) | `units[]` — [domain.Unit](internal/domain/types.go) rows |
 | `list_failed_services` | `manager` (required), same values as `list_units` | `failed[]` — [domain.FailedServiceEntry](internal/domain/types.go); sorted for stable ordering; **meaning of “failed” varies by supervisor** — see [docs/failed-services.md](docs/failed-services.md) |
+| `get_recent_service_logs` | `manager`, `service`, `max_lines` (0=default 100, max 500), optional `recent_window` (Go duration; empty/`0` = line tail only) | `logs[]` — [domain.RecentLogEntry](internal/domain/types.go); `effective_max_lines`, optional `truncated`. **Only systemd** has logs today; **non-zero `recent_window` is unsupported** until a safe time filter exists — see [docs/recent-logs.md](docs/recent-logs.md) |
 
-`list_units` and `list_failed_services` refuse managers that are not **present on `PATH`** for the current OS (see detection table below). Capabilities such as `supports_list_failed_services` come from the same discovery report. All calls go through existing `internal/backend/*` code and the allowlisted runner.
+`list_units`, `list_failed_services`, and `get_recent_service_logs` refuse managers that are not **present on `PATH`** for the current OS (see detection table below). Capabilities (`supports_list_failed_services`, `supports_get_recent_logs`, …) come from the same discovery report. All calls go through existing `internal/backend/*` code and the allowlisted runner.
 
 `list_failed_services` arguments example:
 
@@ -25,6 +26,17 @@ Initial tools (structured JSON via `structuredContent`):
 ```
 
 If discovery reports `supports_list_failed_services: false` for that manager, the tool returns a clear **unsupported** error (read-only; no shell).
+
+`get_recent_service_logs` example (line-bounded tail only; no streaming/follow):
+
+```json
+{
+  "manager": "systemd",
+  "service": "nginx.service",
+  "max_lines": 50,
+  "recent_window": ""
+}
+```
 
 ### Build and run
 

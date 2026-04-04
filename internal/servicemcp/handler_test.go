@@ -56,6 +56,10 @@ type recordingBackend struct {
 	listErr   error
 	failed    []domain.FailedServiceEntry
 	failedErr error
+	logs      []domain.RecentLogEntry
+	logsErr   error
+	lastRef   domain.UnitRef
+	lastLogs  domain.RecentLogsInput
 }
 
 func (b *recordingBackend) Capabilities() domain.BackendCapabilities { return b.caps }
@@ -87,9 +91,14 @@ func (b *recordingBackend) ListFailedServices(ctx context.Context) ([]domain.Fai
 
 func (b *recordingBackend) GetRecentServiceLogs(ctx context.Context, ref domain.UnitRef, in domain.RecentLogsInput) ([]domain.RecentLogEntry, error) {
 	_ = ctx
-	_ = ref
-	_ = in
-	return nil, svcerr.ErrUnsupported
+	b.lastRef = ref
+	b.lastLogs = in
+	if b.logsErr != nil {
+		return nil, b.logsErr
+	}
+	out := make([]domain.RecentLogEntry, len(b.logs))
+	copy(out, b.logs)
+	return out, nil
 }
 
 func TestSortFailedServiceEntries(t *testing.T) {
@@ -277,5 +286,104 @@ func TestHandler_ListFailedServices_successSorted(t *testing.T) {
 	}
 	if len(got) != 2 || got[0].Ref.ID != "a.service" || got[1].Ref.ID != "z.service" {
 		t.Fatalf("got %#v", got)
+	}
+}
+
+func TestHandler_GetRecentServiceLogs_recentWindowUnsupported(t *testing.T) {
+	t.Parallel()
+	h := NewHandler(Options{
+		DetectHook: func(context.Context, detect.Environment) detect.Report {
+			return reportLinuxSystemd(domain.BackendCapabilities{
+				SupportsListUnits:  true,
+				SupportsRecentLogs: true,
+			})
+		},
+	})
+	_, err := h.GetRecentServiceLogs(context.Background(), domain.ManagerSystemd, "nginx.service", 10, "1h")
+	if !errors.Is(err, svcerr.ErrUnsupported) {
+		t.Fatalf("got %v", err)
+	}
+}
+
+func TestHandler_GetRecentServiceLogs_capabilityUnsupported(t *testing.T) {
+	t.Parallel()
+	h := NewHandler(Options{
+		DetectHook: func(context.Context, detect.Environment) detect.Report {
+			return reportLinuxSystemd(domain.BackendCapabilities{
+				SupportsListUnits:  true,
+				SupportsRecentLogs: false,
+			})
+		},
+	})
+	_, err := h.GetRecentServiceLogs(context.Background(), domain.ManagerSystemd, "nginx.service", 10, "")
+	if !errors.Is(err, svcerr.ErrUnsupported) {
+		t.Fatalf("got %v", err)
+	}
+}
+
+func TestHandler_GetRecentServiceLogs_successAndPassesMaxLines(t *testing.T) {
+	t.Parallel()
+	rb := &recordingBackend{
+		caps: domain.BackendCapabilities{
+			Manager:            domain.ManagerSystemd,
+			SupportsRecentLogs: true,
+		},
+		logs: []domain.RecentLogEntry{
+			{Line: "a"},
+			{Line: "b"},
+		},
+	}
+	h := NewHandler(Options{
+		DetectHook: func(context.Context, detect.Environment) detect.Report {
+			return reportLinuxSystemd(domain.BackendCapabilities{
+				SupportsListUnits:  true,
+				SupportsRecentLogs: true,
+			})
+		},
+		NewBackend: func(domain.ServiceManager) (backend.ServiceManagerBackend, error) {
+			return rb, nil
+		},
+	})
+	out, err := h.GetRecentServiceLogs(context.Background(), domain.ManagerSystemd, "nginx.service", 50, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(out.Logs) != 2 || out.EffectiveMaxLines != 50 || out.Truncated {
+		t.Fatalf("got %#v", out)
+	}
+	if rb.lastLogs.MaxLines != 50 || rb.lastRef.ID != "nginx.service" {
+		t.Fatalf("backend in: ref=%#v in=%#v", rb.lastRef, rb.lastLogs)
+	}
+}
+
+func TestHandler_GetRecentServiceLogs_truncatesExcessLines(t *testing.T) {
+	t.Parallel()
+	var long []domain.RecentLogEntry
+	for i := 0; i < 5; i++ {
+		long = append(long, domain.RecentLogEntry{Line: string(rune('a' + i))})
+	}
+	h := NewHandler(Options{
+		DetectHook: func(context.Context, detect.Environment) detect.Report {
+			return reportLinuxSystemd(domain.BackendCapabilities{
+				SupportsListUnits:  true,
+				SupportsRecentLogs: true,
+			})
+		},
+		NewBackend: func(domain.ServiceManager) (backend.ServiceManagerBackend, error) {
+			return &recordingBackend{
+				caps: domain.BackendCapabilities{
+					Manager:            domain.ManagerSystemd,
+					SupportsRecentLogs: true,
+				},
+				logs: long,
+			}, nil
+		},
+	})
+	out, err := h.GetRecentServiceLogs(context.Background(), domain.ManagerSystemd, "nginx.service", 3, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !out.Truncated || len(out.Logs) != 3 || out.Logs[2].Line != "e" {
+		t.Fatalf("got %#v", out)
 	}
 }

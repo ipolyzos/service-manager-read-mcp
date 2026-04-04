@@ -133,6 +133,48 @@ func (h *Handler) ListFailedServices(ctx context.Context, manager domain.Service
 	return sortFailedServiceEntries(entries), nil
 }
 
+// GetRecentServiceLogs returns a bounded, non-streaming tail of log lines for one service.
+// No follow mode and no unbounded reads: max_lines is clamp-validated by [ParseRecentLogsBounds];
+// outputs may be truncated defensively if a backend returns more lines than requested.
+// A non-zero recent_window is rejected with [svcerr.ErrUnsupported] until a safe backend mapping exists.
+func (h *Handler) GetRecentServiceLogs(ctx context.Context, manager domain.ServiceManager, service string, maxLines int, recentWindow string) (GetRecentServiceLogsResult, error) {
+	var empty GetRecentServiceLogsResult
+	if err := ctx.Err(); err != nil {
+		return empty, err
+	}
+	bounds, err := ParseRecentLogsBounds(manager, service, maxLines, recentWindow)
+	if err != nil {
+		return empty, err
+	}
+	if bounds.Window > 0 {
+		return empty, fmt.Errorf("%w: recent_window is not implemented; use empty or 0 for line-bounded tail only", svcerr.ErrUnsupported)
+	}
+	if err := h.requireManager(ctx, manager, func(c domain.BackendCapabilities) bool {
+		return c.SupportsRecentLogs
+	}, "get_recent_service_logs"); err != nil {
+		return empty, err
+	}
+	be, err := h.backendFor(manager)
+	if err != nil {
+		return empty, err
+	}
+	ref := domain.UnitRef{Manager: manager, ID: bounds.Service}
+	entries, err := be.GetRecentServiceLogs(ctx, ref, domain.RecentLogsInput{MaxLines: bounds.MaxLines})
+	if err != nil {
+		return empty, err
+	}
+	truncated := false
+	if len(entries) > bounds.MaxLines {
+		entries = entries[len(entries)-bounds.MaxLines:]
+		truncated = true
+	}
+	return GetRecentServiceLogsResult{
+		Logs:              entries,
+		EffectiveMaxLines: bounds.MaxLines,
+		Truncated:         truncated,
+	}, nil
+}
+
 func sortFailedServiceEntries(entries []domain.FailedServiceEntry) []domain.FailedServiceEntry {
 	if len(entries) < 2 {
 		return entries
