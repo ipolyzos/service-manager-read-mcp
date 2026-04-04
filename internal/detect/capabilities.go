@@ -21,8 +21,8 @@ func capabilityTemplate(m domain.ServiceManager, present bool) domain.BackendCap
 	case domain.ManagerLaunchd:
 		caps.SupportsListUnits = true
 		caps.SupportsGetServiceStatus = true
-		caps.SupportsListFailed = false
-		caps.SupportsRecentLogs = true
+		caps.SupportsListFailed = true
+		caps.SupportsRecentLogs = false
 	case domain.ManagerRunit:
 		caps.SupportsListUnits = true
 		caps.SupportsGetServiceStatus = true
@@ -31,7 +31,7 @@ func capabilityTemplate(m domain.ServiceManager, present bool) domain.BackendCap
 	case domain.ManagerOpenRC, domain.ManagerBrew:
 		caps.SupportsListUnits = true
 		caps.SupportsGetServiceStatus = true
-		caps.SupportsListFailed = false
+		caps.SupportsListFailed = true
 		caps.SupportsRecentLogs = false
 	default:
 		caps.SupportsDetect = false
