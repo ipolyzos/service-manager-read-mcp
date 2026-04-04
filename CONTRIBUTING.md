@@ -50,6 +50,14 @@ go test -race ./...
 
 Full static + build + test parity (requires **golangci-lint** on `PATH`): **`make ci`** or **`./scripts/ci.sh`** — see **[docs/agents.md](docs/agents.md)**.
 
+To exercise the **real** installed MCP binary against **systemd/journalctl** on your machine (all five tools plus journal edge cases), after `go install` or `make build`:
+
+```bash
+go run ./scripts/host_mcp_smoke.go -q
+```
+
+Optional path override: `go run ./scripts/host_mcp_smoke.go -q /path/to/service-manager-read-mcp`. Omit `-q` for full JSON per tool.
+
 ## License
 
 By contributing, you agree that your contributions are licensed under the Apache License 2.0, the same license as the project. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
