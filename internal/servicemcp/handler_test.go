@@ -56,6 +56,8 @@ type recordingBackend struct {
 	listErr   error
 	failed    []domain.FailedServiceEntry
 	failedErr error
+	status    domain.ServiceStatus
+	statusErr error
 	logs      []domain.RecentLogEntry
 	logsErr   error
 	lastRef   domain.UnitRef
@@ -78,7 +80,10 @@ func (b *recordingBackend) ListUnits(ctx context.Context, in domain.ListUnitsInp
 func (b *recordingBackend) GetServiceStatus(ctx context.Context, ref domain.UnitRef) (domain.ServiceStatus, error) {
 	_ = ctx
 	_ = ref
-	return domain.ServiceStatus{}, svcerr.ErrUnsupported
+	if b.statusErr != nil {
+		return domain.ServiceStatus{}, b.statusErr
+	}
+	return b.status, nil
 }
 
 func (b *recordingBackend) ListFailedServices(ctx context.Context) ([]domain.FailedServiceEntry, error) {
