@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`scripts/host_mcp_smoke.go`**: optional local driver (stdio MCP) to smoke-test an installed `service-manager-read-mcp` binary against the real host; documented in **[CONTRIBUTING.md](CONTRIBUTING.md)**.
+
 ### Changed
 
 ### Fixed
