@@ -9,7 +9,6 @@ import (
 const (
 	ToolListServiceManagers = "list_service_managers"
 	ToolListUnits           = "list_units"
-	ToolGetServiceStatus    = "get_service_status"
 )
 
 // ListServiceManagersParams is the input schema for [ToolListServiceManagers].
@@ -29,15 +28,4 @@ type ListUnitsParams struct {
 // ListUnitsResult is the structured output for [ToolListUnits].
 type ListUnitsResult struct {
 	Units []domain.Unit `json:"units"`
-}
-
-// GetServiceStatusParams is the input schema for [ToolGetServiceStatus].
-type GetServiceStatusParams struct {
-	Manager string `json:"manager" jsonschema:"Supervisor: systemd, launchd, openrc, runit, brew_services (or brew)"`
-	ID      string `json:"id" jsonschema:"Unit/service id for that supervisor (systemd unit name, launchd label, OpenRC/runit service name, brew formula)"`
-}
-
-// GetServiceStatusResult is the structured output for [ToolGetServiceStatus].
-type GetServiceStatusResult struct {
-	Status domain.ServiceStatus `json:"status"`
 }

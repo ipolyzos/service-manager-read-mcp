@@ -4,35 +4,44 @@ A **stdio** [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) ser
 
 The server is designed to be **safe by default**: it does not start, stop, or reconfigure services. It wraps common service-manager command-line interfaces so agents and tools can query status and metadata in a consistent shape across platforms.
 
-## MCP tools
+## MCP server (stdio)
 
-Run the server with `go run ./cmd/service-manager-read-mcp` (stdio MCP). Tools are registered in [`internal/servicemcp`](internal/servicemcp) and are read-only.
+The binary **`service-manager-read-mcp`** runs an MCP server on **stdin/stdout** using the official [Go MCP SDK](https://github.com/modelcontextprotocol/go-sdk). **JSON-RPC traffic uses stdout only**; logs go to **stderr**.
 
-| Tool | Arguments | Result |
-| ---- | --------- | ------ |
-| `list_service_managers` | _(none)_ | `detect.Report` with per-manager PATH presence and capability flags |
-| `list_units` | `manager`, optional `limit` | `domain.Unit` rows for that supervisor |
-| `get_service_status` | `manager`, `id` | `domain.ServiceStatus` for one unit |
+Initial tools (structured JSON via `structuredContent`):
 
-Call `list_service_managers` first to see which `manager` values are available. For `get_service_status`, the manager must be on `PATH` and advertise `supports_get_service_status` in the report; `id` must satisfy that backend’s unit/service rules (same validation as allowlisted argv).
+| Tool | Input | Output |
+| ---- | ----- | ------ |
+| `list_service_managers` | _(none)_ | `report` — same shape as [detect.Report](internal/detect/detect.go) (`goos`, `findings[]` with `capabilities`) |
+| `list_units` | `manager` (required): `systemd` \| `launchd` \| `openrc` \| `runit` \| `brew_services` (or `brew`); `limit` (optional, 0–10000) | `units[]` — [domain.Unit](internal/domain/types.go) rows |
 
-Example tool arguments (JSON), after choosing a manager from discovery:
+`list_units` refuses managers that are not **present on `PATH`** for the current OS (see detection table below). All unit listing goes through existing `internal/backend/*` code and the allowlisted runner.
+
+### Build and run
+
+Requires **[Go 1.25+](https://go.dev/dl/)** (MCP SDK).
+
+```bash
+go build -o bin/service-manager-read-mcp ./cmd/service-manager-read-mcp
+./bin/service-manager-read-mcp
+```
+
+### IDE configuration (example)
+
+Point your MCP client at the built binary (absolute path). Example shape:
 
 ```json
 {
-  "manager": "systemd",
-  "id": "nginx.service"
+  "mcpServers": {
+    "service-manager-read": {
+      "command": "/absolute/path/to/bin/service-manager-read-mcp",
+      "args": []
+    }
+  }
 }
 ```
 
-```json
-{
-  "manager": "brew_services",
-  "id": "redis"
-}
-```
-
-Failure modes are explicit tool errors (not ad-hoc shell): invalid `manager` / `id` → `invalid invocation argument`; supervisor not applicable or not on `PATH` → `backend unavailable`; discovery says the capability is off → `operation unsupported`; unknown unit → `unit not found`.
+Adjust keys to match your client (Cursor, Claude Desktop, etc.).
 
 ## Scope (planned)
 
@@ -126,9 +135,9 @@ Package `internal/backend/openrc` implements `ServiceManagerBackend` via **`open
 ## Project layout
 
 ```
-cmd/service-manager-read-mcp/   # stdio MCP entrypoint
+cmd/service-manager-read-mcp/   # MCP stdio entrypoint (+ integration smoke test)
 internal/
-  servicemcp/                   # MCP tool registration and handlers
+  servicemcp/                   # MCP tool schemas, handlers, RegisterTools, RunStdio
   domain/                       # shared types (units, status, logs, capabilities)
   svcerr/                       # typed errors for backends and runners
   runner/                       # argv-only subprocess runner (+ test fake)
@@ -138,11 +147,13 @@ internal/
   backend/systemd/              # systemd/journald backend (allowlisted CLIs)
   backend/launchd/              # launchd backend (allowlisted launchctl)
   backend/openrc/               # OpenRC backend (rc-service / rc-status)
+  backend/runit/                # runit backend (allowlisted sv)
+  backend/brew/                 # Homebrew services backend (allowlisted brew)
 ```
 
 ## Development
 
-Requires [Go 1.22+](https://go.dev/dl/).
+Requires [Go 1.25+](https://go.dev/dl/) for the MCP SDK.
 
 ```bash
 go build -o bin/service-manager-read-mcp ./cmd/service-manager-read-mcp
@@ -150,11 +161,11 @@ go test ./...
 go vet ./...
 ```
 
-Subprocess execution for backends is routed through `internal/runner`: build an allowlisted `runner.Registry`, wrap a `runner.Exec` (or test `runner.Func`) with `runner.SafeRunner`, and call `RunInvocation`—never hand-construct argv from tool or agent input. See [docs/architecture.md](docs/architecture.md).
+Subprocess execution for backends is routed through `internal/runner`: build an allowlisted `runner.Registry`, wrap a `runner.Exec` (or test `runner.Func`) with `runner.SafeRunner`, and call `RunInvocation`—never hand-construct argv from tool or agent input. MCP tools call `internal/servicemcp` only, which uses `detect` and `backend` packages. See [docs/architecture.md](docs/architecture.md).
 
 ## Status
 
-Domain model, backend interface, allowlisted subprocess runner, PATH-based supervisor detection, a stub backend, **systemd**, **launchd**, **OpenRC**, **runit**, and **Homebrew services** backends, plus a **stdio MCP server** with `list_service_managers`, `list_units`, and `get_service_status`, are in place.
+MCP **stdio server** with tools **`list_service_managers`** and **`list_units`** is wired. Library backends (**systemd**, **launchd**, **OpenRC**, **runit**, **Homebrew services**) and allowlisted execution remain the only way to reach host CLIs. Additional MCP tools and supervisors may follow.
 
 ## License
 

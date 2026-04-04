@@ -20,11 +20,6 @@ func RegisterTools(server *mcp.Server, h *Handler) {
 		Name:        ToolListUnits,
 		Description: "List units for one supervisor (read-only). Use list_service_managers to see which managers are available; manager must be present on PATH.",
 	}, listUnitsHandler(h))
-
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        ToolGetServiceStatus,
-		Description: "Read normalized status for a single unit (read-only). Requires manager on PATH and supports_get_service_status in discovery; id is validated per supervisor.",
-	}, getServiceStatusHandler(h))
 }
 
 func listServiceManagersHandler(h *Handler) mcp.ToolHandlerFor[ListServiceManagersParams, ListServiceManagersResult] {
@@ -51,25 +46,5 @@ func listUnitsHandler(h *Handler) mcp.ToolHandlerFor[ListUnitsParams, ListUnitsR
 			return nil, ListUnitsResult{}, err
 		}
 		return nil, ListUnitsResult{Units: units}, nil
-	}
-}
-
-func getServiceStatusHandler(h *Handler) mcp.ToolHandlerFor[GetServiceStatusParams, GetServiceStatusResult] {
-	return func(ctx context.Context, _ *mcp.CallToolRequest, in GetServiceStatusParams) (*mcp.CallToolResult, GetServiceStatusResult, error) {
-		if strings.TrimSpace(in.Manager) == "" {
-			return nil, GetServiceStatusResult{}, fmt.Errorf("%w: manager is required", svcerr.ErrInvalidArgument)
-		}
-		if strings.TrimSpace(in.ID) == "" {
-			return nil, GetServiceStatusResult{}, fmt.Errorf("%w: id is required", svcerr.ErrInvalidArgument)
-		}
-		mgr, err := ParseServiceManager(in.Manager)
-		if err != nil {
-			return nil, GetServiceStatusResult{}, err
-		}
-		st, err := h.GetServiceStatus(ctx, mgr, in.ID)
-		if err != nil {
-			return nil, GetServiceStatusResult{}, err
-		}
-		return nil, GetServiceStatusResult{Status: st}, nil
 	}
 }

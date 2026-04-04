@@ -2,7 +2,7 @@
 
 ## Overview
 
-`service-manager-read-mcp` is a stdio MCP server (`cmd/service-manager-read-mcp`) that answers read-only questions about service state by executing **allowlisted** platform CLIs and normalizing their output into shared domain types.
+`service-manager-read-mcp` is a stdio MCP server that answers read-only questions about service state by executing **allowlisted** platform CLIs and normalizing their output into shared domain types. Tool handlers live in `internal/servicemcp` and call `internal/detect` plus `internal/backend/*` only—no ad-hoc subprocesses.
 
 ## Command execution boundaries
 
@@ -32,13 +32,15 @@
 | `internal/backend/runit` | Allowlisted `sv` (`-v`, `status <name>`); service-dir scan for list; logs unsupported. |
 | `internal/backend/brew` | Allowlisted `brew` for `services list/info --json`; logs unsupported. |
 | `internal/backend` (other) | Any future supervisors map domain operations to `CommandID` + params. |
-| `internal/servicemcp` | Registers MCP tools (`list_service_managers`, `list_units`, `get_service_status`). Uses `internal/detect` for PATH-only availability and capability checks, then the matching `ServiceManagerBackend`. `get_service_status` validates `id` per backend before invocation and returns structured `domain.ServiceStatus` or typed errors (`ErrInvalidArgument`, `ErrBackendUnavailable`, `ErrUnsupported`, `ErrUnitNotFound`). |
+| `internal/servicemcp` | MCP tool schemas and handlers (`list_service_managers`, `list_units`); uses [github.com/modelcontextprotocol/go-sdk](https://github.com/modelcontextprotocol/go-sdk) with `StdioTransport`. |
+| `cmd/service-manager-read-mcp` | Process entry: `RunStdio` (logs to stderr; JSON-RPC on stdout). |
 
 ## Testing strategy
 
 - **Registry:** argv construction, unknown IDs, arity, and parameter validation (table-driven).
 - **SafeRunner:** delegates to `Func` to assert the resolved `Spec` and to assert context deadlines propagate.
 - **Exec:** uses tiny POSIX utilities when present (`true`, `false`, `echo`, `yes`, `sleep`) plus `readLimited` unit tests for capture logic.
+- **MCP:** `internal/servicemcp` tests use in-memory transports for tool listing, schema presence, `tools/call`, and structured JSON outputs; `cmd/service-manager-read-mcp` has a short stdio smoke test (EOF stdin).
 
 ## Related decisions
 
