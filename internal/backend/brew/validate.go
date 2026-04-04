@@ -20,6 +20,11 @@ func FormulaNameParam(name string) runner.ParamRule {
 	}
 }
 
+// ValidateServiceQueryID applies the same rules as [FormulaNameParam] for read-only queries.
+func ValidateServiceQueryID(s string) error {
+	return validateFormulaName(s)
+}
+
 func validateFormulaName(s string) error {
 	if s == "" {
 		return fmt.Errorf("empty formula name")

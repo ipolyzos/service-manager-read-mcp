@@ -20,6 +20,11 @@ func ServiceNameParam(name string) runner.ParamRule {
 	}
 }
 
+// ValidateServiceQueryID applies the same rules as [ServiceNameParam] for read-only queries.
+func ValidateServiceQueryID(s string) error {
+	return validateServiceName(s)
+}
+
 func validateServiceName(s string) error {
 	if s == "" {
 		return fmt.Errorf("empty service name")
