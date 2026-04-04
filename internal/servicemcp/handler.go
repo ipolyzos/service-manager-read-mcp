@@ -28,6 +28,9 @@ type Options struct {
 	NewBackend func(domain.ServiceManager) (backend.ServiceManagerBackend, error)
 	// DetectHook replaces [detect.Detect] for handler routing (tests). Nil uses [detect.Detect].
 	DetectHook func(context.Context, detect.Environment) detect.Report
+	// ImplementationVersion is the MCP server semver advertised in initialize. If empty,
+	// RunStdio uses internal/version.MCPVersion() (module version, link-time Version, or 0.0.0-dev).
+	ImplementationVersion string
 }
 
 // Handler bridges MCP tools to [detect] and [backend.ServiceManagerBackend] without executing ad-hoc shell.
