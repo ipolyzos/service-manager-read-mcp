@@ -53,9 +53,11 @@ make build
 ./bin/service-manager-read-mcp
 ```
 
-**Release binary** (embedded semver and build metadata): `make build-release VERSION=0.4.0`. **`go install …@vX.Y.Z`** is described in [docs/distribution.md](docs/distribution.md).
+### Development and CI
 
-### MCP clients (configuration example)
+Local checks aligned with GitHub Actions: **`make ci`** or **`./scripts/ci.sh`** (needs **[golangci-lint](https://golangci-lint.run/welcome/install/)** on `PATH`). See **[CONTRIBUTING.md](CONTRIBUTING.md)** for focused targets (`make test-short`, `make test-smoke`) and **[docs/agents.md](docs/agents.md)** for the full step list.
+
+### IDE configuration (example)
 
 Point your MCP client at the built binary (**absolute path**). Keep **`args`** empty so stdin/stdout stay dedicated to JSON-RPC:
 
