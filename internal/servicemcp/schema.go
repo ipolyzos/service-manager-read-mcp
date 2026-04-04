@@ -9,6 +9,7 @@ import (
 const (
 	ToolListServiceManagers = "list_service_managers"
 	ToolListUnits           = "list_units"
+	ToolListFailedServices  = "list_failed_services"
 )
 
 // ListServiceManagersParams is the input schema for [ToolListServiceManagers].
@@ -28,4 +29,14 @@ type ListUnitsParams struct {
 // ListUnitsResult is the structured output for [ToolListUnits].
 type ListUnitsResult struct {
 	Units []domain.Unit `json:"units"`
+}
+
+// ListFailedServicesParams is the input schema for [ToolListFailedServices].
+type ListFailedServicesParams struct {
+	Manager string `json:"manager" jsonschema:"Supervisor: systemd, launchd, openrc, runit, brew_services (or brew)"`
+}
+
+// ListFailedServicesResult is the structured output for [ToolListFailedServices].
+type ListFailedServicesResult struct {
+	Failed []domain.FailedServiceEntry `json:"failed"`
 }

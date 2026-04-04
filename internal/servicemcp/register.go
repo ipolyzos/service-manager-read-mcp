@@ -20,6 +20,11 @@ func RegisterTools(server *mcp.Server, h *Handler) {
 		Name:        ToolListUnits,
 		Description: "List units for one supervisor (read-only). Use list_service_managers to see which managers are available; manager must be present on PATH.",
 	}, listUnitsHandler(h))
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        ToolListFailedServices,
+		Description: "List failed or unhealthy services for one supervisor (read-only). Requires supports_list_failed_services in discovery; meaning of 'failed' varies by manager—see project docs.",
+	}, listFailedServicesHandler(h))
 }
 
 func listServiceManagersHandler(h *Handler) mcp.ToolHandlerFor[ListServiceManagersParams, ListServiceManagersResult] {
@@ -46,5 +51,22 @@ func listUnitsHandler(h *Handler) mcp.ToolHandlerFor[ListUnitsParams, ListUnitsR
 			return nil, ListUnitsResult{}, err
 		}
 		return nil, ListUnitsResult{Units: units}, nil
+	}
+}
+
+func listFailedServicesHandler(h *Handler) mcp.ToolHandlerFor[ListFailedServicesParams, ListFailedServicesResult] {
+	return func(ctx context.Context, _ *mcp.CallToolRequest, in ListFailedServicesParams) (*mcp.CallToolResult, ListFailedServicesResult, error) {
+		if strings.TrimSpace(in.Manager) == "" {
+			return nil, ListFailedServicesResult{}, fmt.Errorf("%w: manager is required", svcerr.ErrInvalidArgument)
+		}
+		mgr, err := ParseServiceManager(in.Manager)
+		if err != nil {
+			return nil, ListFailedServicesResult{}, err
+		}
+		failed, err := h.ListFailedServices(ctx, mgr)
+		if err != nil {
+			return nil, ListFailedServicesResult{}, err
+		}
+		return nil, ListFailedServicesResult{Failed: failed}, nil
 	}
 }
