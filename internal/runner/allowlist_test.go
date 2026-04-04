@@ -49,6 +49,7 @@ func TestRegistry_argumentConstruction(t *testing.T) {
 		Params: []runner.ParamRule{
 			runner.NonEmptyParam("message"),
 		},
+		SuffixArgs: []string{"--", "tail"},
 	})
 	if err != nil {
 		t.Fatal(err)
@@ -63,7 +64,7 @@ func TestRegistry_argumentConstruction(t *testing.T) {
 	if spec.Path != echoPath {
 		t.Fatalf("path: %q", spec.Path)
 	}
-	want := []string{"-n", "hello"}
+	want := []string{"-n", "hello", "--", "tail"}
 	if len(spec.Args) != len(want) {
 		t.Fatalf("args=%v want=%v", spec.Args, want)
 	}

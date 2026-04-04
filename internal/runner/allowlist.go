@@ -34,10 +34,12 @@ type ParamRule struct {
 
 // Policy describes one executable path, fixed argv tail, and validated parameter slots.
 type Policy struct {
-	ID             CommandID
-	Binary         string
-	FixedArgs      []string
-	Params         []ParamRule
+	ID        CommandID
+	Binary    string
+	FixedArgs []string
+	Params    []ParamRule
+	// SuffixArgs are appended after Params (e.g. trailing --property= flags for systemctl show).
+	SuffixArgs     []string
 	DefaultTimeout time.Duration
 	// MaxStdoutBytes and MaxStderrBytes bound each stream; zero applies DefaultMaxStreamBytes at build time.
 	MaxStdoutBytes int
@@ -98,6 +100,9 @@ func (r *Registry) Build(inv Invocation) (Spec, error) {
 		}
 	}
 	args := append(append([]string{}, p.FixedArgs...), inv.Params...)
+	if len(p.SuffixArgs) > 0 {
+		args = append(args, p.SuffixArgs...)
+	}
 
 	timeout := p.DefaultTimeout
 	if inv.Timeout > 0 {
