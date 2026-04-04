@@ -18,7 +18,7 @@ const (
 func RunStdio(ctx context.Context, logWriter io.Writer, opt Options) error {
 	h := NewHandler(opt)
 	s := mcp.NewServer(&mcp.Implementation{Name: defaultServerName, Version: defaultServerVersion}, &mcp.ServerOptions{
-		Instructions: "Read-only access to host service supervisors. Tools never start, stop, or reconfigure services.",
+		Instructions: "Read-only host supervisor tools: discovery first (list_service_managers), then per-manager calls. Errors are typed (invalid argument, unavailable, unsupported, parse, invocation). No start/stop/reconfigure.",
 		Logger:       slog.New(slog.NewTextHandler(logWriter, &slog.HandlerOptions{Level: slog.LevelError})),
 	})
 	RegisterTools(s, h)
