@@ -38,6 +38,8 @@ go test ./...
 go vet ./...
 ```
 
+Subprocess execution for backends is routed through `internal/runner`: build an allowlisted `runner.Registry`, wrap a `runner.Exec` (or test `runner.Func`) with `runner.SafeRunner`, and call `RunInvocation`—never hand-construct argv from tool or agent input. See [docs/architecture.md](docs/architecture.md).
+
 ## Status
 
 Domain model, backend interface, subprocess runner abstraction, and a stub backend are in place. MCP stdio wiring and real supervisor integrations are not implemented yet.
