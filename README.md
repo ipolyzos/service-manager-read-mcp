@@ -4,6 +4,8 @@ A **stdio** [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) ser
 
 The server is **safe by default**: it does not start, stop, or reconfigure services. It wraps allowlisted supervisor CLIs so agents can query status and metadata in a consistent shape across platforms.
 
+**Threat model (skim):** the process only runs **known binaries** with **fixed argv templates** and **validated parameter slots**—no shell, no free-form flags from tool input, bounded stdout/stderr and timeouts. It is aimed at **read-only inspection** on a machine where you already trust running this binary; it does not sandbox the host against a malicious local user. For boundaries and layering, see [docs/architecture.md](docs/architecture.md).
+
 ## Documentation
 
 All detailed documentation lives under **`docs/`**. Start at **[docs/README.md](docs/README.md)**.
