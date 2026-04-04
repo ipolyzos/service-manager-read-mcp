@@ -18,6 +18,26 @@ Thank you for your interest in **service-manager-read-mcp**.
 
 All participants are expected to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
 
+## Testing
+
+From the repository root (requires Go **1.25+**, same as [go.mod](go.mod)):
+
+```bash
+go test ./...
+```
+
+Stdio MCP end-to-end coverage (builds `cmd/service-manager-read-mcp-e2e`, then drives it over stdin/stdout with the official MCP client transport):
+
+```bash
+go test ./internal/e2e/...
+```
+
+For parity with CI:
+
+```bash
+go test -race ./...
+```
+
 ## License
 
 By contributing, you agree that your contributions are licensed under the Apache License 2.0, the same license as the project. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
