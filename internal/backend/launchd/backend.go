@@ -65,6 +65,9 @@ func (b *Backend) Capabilities() domain.BackendCapabilities {
 
 // DetectServiceManager implements backend.ServiceManagerBackend.
 func (b *Backend) DetectServiceManager(ctx context.Context) (domain.ServiceManager, error) {
+	if err := ctx.Err(); err != nil {
+		return domain.ManagerUnknown, err
+	}
 	if runtime.GOOS != "darwin" {
 		return domain.ManagerUnknown, svcerr.ErrBackendUnavailable
 	}
@@ -81,6 +84,9 @@ func (b *Backend) DetectServiceManager(ctx context.Context) (domain.ServiceManag
 
 // ListUnits implements backend.ServiceManagerBackend.
 func (b *Backend) ListUnits(ctx context.Context, in domain.ListUnitsInput) ([]domain.Unit, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	res, err := b.safe.RunInvocation(ctx, runner.Invocation{ID: cmdList})
 	if err != nil {
 		return nil, err
@@ -98,6 +104,9 @@ func (b *Backend) ListUnits(ctx context.Context, in domain.ListUnitsInput) ([]do
 
 // GetServiceStatus implements backend.ServiceManagerBackend.
 func (b *Backend) GetServiceStatus(ctx context.Context, ref domain.UnitRef) (domain.ServiceStatus, error) {
+	if err := ctx.Err(); err != nil {
+		return domain.ServiceStatus{}, err
+	}
 	if ref.Manager != domain.ManagerLaunchd && ref.Manager != domain.ManagerUnknown && ref.Manager != "" {
 		return domain.ServiceStatus{}, svcerr.ErrUnsupported
 	}
@@ -128,6 +137,9 @@ func (b *Backend) GetServiceStatus(ctx context.Context, ref domain.UnitRef) (dom
 // ListFailedServices implements backend.ServiceManagerBackend.
 // This is a read-only heuristic: rows from launchctl list whose last exit status is non-zero.
 func (b *Backend) ListFailedServices(ctx context.Context) ([]domain.FailedServiceEntry, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	res, err := b.safe.RunInvocation(ctx, runner.Invocation{ID: cmdList})
 	if err != nil {
 		return nil, err
@@ -141,7 +153,9 @@ func (b *Backend) ListFailedServices(ctx context.Context) ([]domain.FailedServic
 
 // GetRecentServiceLogs implements backend.ServiceManagerBackend.
 func (b *Backend) GetRecentServiceLogs(ctx context.Context, ref domain.UnitRef, in domain.RecentLogsInput) ([]domain.RecentLogEntry, error) {
-	_ = ctx
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
 	_ = ref
 	_ = in
 	return nil, svcerr.ErrUnsupported

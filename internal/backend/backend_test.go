@@ -10,6 +10,21 @@ import (
 	"github.com/ipolyzos/service-manager-read-mcp/internal/svcerr"
 )
 
+func TestStubBackend_contextCanceled(t *testing.T) {
+	t.Parallel()
+	ctx, cancel := context.WithCancel(context.Background())
+	cancel()
+	b := &stub.Backend{Manager: domain.ManagerSystemd, Available: true}
+	_, err := b.ListUnits(ctx, domain.ListUnitsInput{})
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("ListUnits: %v", err)
+	}
+	_, err = b.GetRecentServiceLogs(ctx, domain.UnitRef{Manager: domain.ManagerSystemd, ID: "x.service"}, domain.RecentLogsInput{})
+	if !errors.Is(err, context.Canceled) {
+		t.Fatalf("GetRecentServiceLogs: %v", err)
+	}
+}
+
 func TestStubBackend_detectAndList(t *testing.T) {
 	t.Parallel()
 	ctx := context.Background()
