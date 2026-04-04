@@ -2,7 +2,7 @@
 
 ## Overview
 
-`service-manager-read-mcp` is a stdio MCP server (wiring pending) that answers read-only questions about service state by executing **allowlisted** platform CLIs and normalizing their output into shared domain types.
+`service-manager-read-mcp` is a stdio MCP server (`cmd/service-manager-read-mcp`) that answers read-only questions about service state by executing **allowlisted** platform CLIs and normalizing their output into shared domain types.
 
 ## Command execution boundaries
 
@@ -32,7 +32,7 @@
 | `internal/backend/runit` | Allowlisted `sv` (`-v`, `status <name>`); service-dir scan for list; logs unsupported. |
 | `internal/backend/brew` | Allowlisted `brew` for `services list/info --json`; logs unsupported. |
 | `internal/backend` (other) | Any future supervisors map domain operations to `CommandID` + params. |
-| MCP surface (future) | JSON-RPC over stdio; maps tool calls to backend operations. |
+| `internal/servicemcp` | Registers MCP tools (`list_service_managers`, `list_units`, `get_service_status`). Uses `internal/detect` for PATH-only availability and capability checks, then the matching `ServiceManagerBackend`. `get_service_status` validates `id` per backend before invocation and returns structured `domain.ServiceStatus` or typed errors (`ErrInvalidArgument`, `ErrBackendUnavailable`, `ErrUnsupported`, `ErrUnitNotFound`). |
 
 ## Testing strategy
 

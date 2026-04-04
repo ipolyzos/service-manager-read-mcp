@@ -4,6 +4,36 @@ A **stdio** [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) ser
 
 The server is designed to be **safe by default**: it does not start, stop, or reconfigure services. It wraps common service-manager command-line interfaces so agents and tools can query status and metadata in a consistent shape across platforms.
 
+## MCP tools
+
+Run the server with `go run ./cmd/service-manager-read-mcp` (stdio MCP). Tools are registered in [`internal/servicemcp`](internal/servicemcp) and are read-only.
+
+| Tool | Arguments | Result |
+| ---- | --------- | ------ |
+| `list_service_managers` | _(none)_ | `detect.Report` with per-manager PATH presence and capability flags |
+| `list_units` | `manager`, optional `limit` | `domain.Unit` rows for that supervisor |
+| `get_service_status` | `manager`, `id` | `domain.ServiceStatus` for one unit |
+
+Call `list_service_managers` first to see which `manager` values are available. For `get_service_status`, the manager must be on `PATH` and advertise `supports_get_service_status` in the report; `id` must satisfy that backend’s unit/service rules (same validation as allowlisted argv).
+
+Example tool arguments (JSON), after choosing a manager from discovery:
+
+```json
+{
+  "manager": "systemd",
+  "id": "nginx.service"
+}
+```
+
+```json
+{
+  "manager": "brew_services",
+  "id": "redis"
+}
+```
+
+Failure modes are explicit tool errors (not ad-hoc shell): invalid `manager` / `id` → `invalid invocation argument`; supervisor not applicable or not on `PATH` → `backend unavailable`; discovery says the capability is off → `operation unsupported`; unknown unit → `unit not found`.
+
 ## Scope (planned)
 
 Platform tooling this project intends to wrap (where available on the host):
@@ -96,8 +126,9 @@ Package `internal/backend/openrc` implements `ServiceManagerBackend` via **`open
 ## Project layout
 
 ```
-cmd/service-manager-read-mcp/   # process entrypoint (MCP wiring pending)
+cmd/service-manager-read-mcp/   # stdio MCP entrypoint
 internal/
+  servicemcp/                   # MCP tool registration and handlers
   domain/                       # shared types (units, status, logs, capabilities)
   svcerr/                       # typed errors for backends and runners
   runner/                       # argv-only subprocess runner (+ test fake)
@@ -123,7 +154,7 @@ Subprocess execution for backends is routed through `internal/runner`: build an 
 
 ## Status
 
-Domain model, backend interface, allowlisted subprocess runner, PATH-based supervisor detection, a stub backend, **systemd**, **launchd**, and **OpenRC** backends (library only) are in place. MCP stdio wiring and remaining supervisors are not implemented yet.
+Domain model, backend interface, allowlisted subprocess runner, PATH-based supervisor detection, a stub backend, **systemd**, **launchd**, **OpenRC**, **runit**, and **Homebrew services** backends, plus a **stdio MCP server** with `list_service_managers`, `list_units`, and `get_service_status`, are in place.
 
 ## License
 
