@@ -72,9 +72,8 @@ func ParseLaunchctlPrint(ref domain.UnitRef, stdout []byte) (domain.ServiceStatu
 		return domain.ServiceStatus{}, fmt.Errorf("%w: %v", svcerr.ErrParse, err)
 	}
 
-	if st.Active == domain.ActiveStateActive {
-		st.Load = domain.LoadStateLoaded
-	} else if st.Active == domain.ActiveStateInactive {
+	switch st.Active {
+	case domain.ActiveStateActive, domain.ActiveStateInactive:
 		st.Load = domain.LoadStateLoaded
 	}
 	return st, nil
