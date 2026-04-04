@@ -42,7 +42,7 @@ Stdio MCP end-to-end coverage (builds `cmd/service-manager-read-mcp-e2e`, then d
 go test ./internal/e2e/...
 ```
 
-For parity with CI:
+Quick test sweep (CI also runs `gofmt`, modules, `vet`, **golangci-lint**, build, `-short` tests, and the stdio smoke test—see **`make ci`**):
 
 ```bash
 go test -race ./...

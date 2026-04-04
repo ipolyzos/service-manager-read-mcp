@@ -7,14 +7,19 @@
 
 ## CI vs local checks
 
-**GitHub Actions** (`.github/workflows/ci.yml`) on push/PR to `main` and `develop`:
+**GitHub Actions** (`.github/workflows/ci.yml`) on push/PR to `main` and `develop` runs the same sequence as **`./scripts/ci.sh`** / **`make ci`**:
 
 | Step | Command |
 | ---- | ------- |
+| Format | `gofmt -l` (must be empty) |
+| Modules | `go mod verify`; `go mod tidy` then `git diff --exit-code go.mod go.sum` |
+| Vet | `go vet ./...` |
+| Lint | `golangci-lint run ./... --timeout=5m` (pinned in the workflow) |
 | Build | `go build ./...` |
-| Test | `go test -race ./...` |
+| Test | `go test -count=1 -race -short ./...` |
+| Smoke | `go test -count=1 -race ./cmd/service-manager-read-mcp -run '^TestCLI_stdioSmoke$'` |
 
-**Local `make ci`** / **`./scripts/ci.sh`** is stricter: `gofmt`, `go mod verify`, `go mod tidy` check, `go vet`, `golangci-lint`, `go build ./...`, `go test -race -short ./...`, then the stdio smoke test. Run it before release prep or when changing Go code.
+Run **`make ci`** locally before release prep or when changing Go code (requires **golangci-lint** on `PATH`).
 
 ## Releases
 

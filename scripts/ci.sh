@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Local parity with .github/workflows/ci.yml (static + build + tests).
+# Same checks as GitHub Actions (`.github/workflows/ci.yml`); run locally before push or release prep.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
