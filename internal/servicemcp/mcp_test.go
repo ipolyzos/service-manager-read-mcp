@@ -35,7 +35,7 @@ func TestRegisterTools_toolMetadata(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer session.Close()
+	t.Cleanup(func() { _ = session.Close() })
 
 	want := map[string]bool{
 		ToolListServiceManagers:  false,
@@ -86,7 +86,7 @@ func TestRegisterTools_callListServiceManagers(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer session.Close()
+	t.Cleanup(func() { _ = session.Close() })
 
 	res, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name:      ToolListServiceManagers,
@@ -127,7 +127,7 @@ func TestRegisterTools_listUnitsValidation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer session.Close()
+	t.Cleanup(func() { _ = session.Close() })
 
 	_, err = session.CallTool(ctx, &mcp.CallToolParams{
 		Name:      ToolListUnits,
@@ -161,7 +161,7 @@ func TestRegisterTools_listUnitsUnavailableBackend(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer session.Close()
+	t.Cleanup(func() { _ = session.Close() })
 
 	res, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name:      ToolListUnits,
@@ -191,7 +191,7 @@ func TestRegisterTools_listFailedServicesValidation(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer session.Close()
+	t.Cleanup(func() { _ = session.Close() })
 
 	_, err = session.CallTool(ctx, &mcp.CallToolParams{
 		Name:      ToolListFailedServices,
@@ -236,7 +236,7 @@ func TestRegisterTools_listFailedServicesSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer session.Close()
+	t.Cleanup(func() { _ = session.Close() })
 
 	res, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name:      ToolListFailedServices,
@@ -284,7 +284,7 @@ func TestRegisterTools_listFailedServicesUnsupported(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer session.Close()
+	t.Cleanup(func() { _ = session.Close() })
 
 	res, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name:      ToolListFailedServices,
@@ -321,7 +321,7 @@ func TestRegisterTools_listFailedServicesUnavailable(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer session.Close()
+	t.Cleanup(func() { _ = session.Close() })
 
 	res, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name:      ToolListFailedServices,
@@ -351,7 +351,7 @@ func TestRegisterTools_listFailedServicesNotFoundManagerString(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer session.Close()
+	t.Cleanup(func() { _ = session.Close() })
 
 	res, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name:      ToolListFailedServices,
@@ -388,7 +388,7 @@ func TestRegisterTools_getRecentServiceLogsUnsupportedCapability(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer session.Close()
+	t.Cleanup(func() { _ = session.Close() })
 
 	res, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name: ToolGetRecentServiceLogs,
@@ -438,7 +438,7 @@ func TestRegisterTools_getRecentServiceLogsSuccess(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer session.Close()
+	t.Cleanup(func() { _ = session.Close() })
 
 	res, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name: ToolGetRecentServiceLogs,
@@ -490,7 +490,7 @@ func TestRegisterTools_getRecentServiceLogsRecentWindowRejected(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer session.Close()
+	t.Cleanup(func() { _ = session.Close() })
 
 	res, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name: ToolGetRecentServiceLogs,

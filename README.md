@@ -47,6 +47,10 @@ go build -o bin/service-manager-read-mcp ./cmd/service-manager-read-mcp
 ./bin/service-manager-read-mcp
 ```
 
+### Development and CI
+
+Local checks aligned with GitHub Actions: **`make ci`** or **`./scripts/ci.sh`** (needs **[golangci-lint](https://golangci-lint.run/welcome/install/)** on `PATH`). See **[CONTRIBUTING.md](CONTRIBUTING.md)** for focused targets (`make test-short`, `make test-smoke`) and **[docs/agents.md](docs/agents.md)** for the full step list.
+
 ### IDE configuration (example)
 
 Point your MCP client at the built binary (absolute path). Example shape:

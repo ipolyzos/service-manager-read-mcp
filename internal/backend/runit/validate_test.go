@@ -5,8 +5,8 @@ import "testing"
 func TestValidateServiceName(t *testing.T) {
 	t.Parallel()
 	for _, tc := range []struct {
-		in  string
-		ok  bool
+		in string
+		ok bool
 	}{
 		{"nginx", true},
 		{"foo-bar", true},
