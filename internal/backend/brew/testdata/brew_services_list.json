@@ -1,0 +1,37 @@
+[
+  {
+    "name": "nginx",
+    "status": "started",
+    "user": null,
+    "file": "/opt/homebrew/opt/nginx/homebrew.nginx.service",
+    "exit_code": null
+  },
+  {
+    "name": "redis",
+    "status": "stopped",
+    "user": null,
+    "file": "/opt/homebrew/opt/redis/homebrew.redis.service",
+    "exit_code": null
+  },
+  {
+    "name": "badsvc",
+    "status": "error",
+    "user": null,
+    "file": "/opt/homebrew/opt/badsvc/homebrew.badsvc.service",
+    "exit_code": 1
+  },
+  {
+    "name": "weird",
+    "status": "started",
+    "user": null,
+    "file": "/opt/homebrew/opt/weird/homebrew.weird.service",
+    "exit_code": 2
+  },
+  {
+    "name": "old",
+    "status": "stopped",
+    "user": null,
+    "file": "/opt/homebrew/opt/old/homebrew.old.service",
+    "exit_code": 7
+  }
+]

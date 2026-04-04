@@ -1,0 +1,16 @@
+[
+  {
+    "name": "nginx",
+    "service_name": "homebrew.nginx",
+    "running": true,
+    "loaded": true,
+    "schedulable": true,
+    "pid": 4242,
+    "exit_code": null,
+    "user": "alice",
+    "status": "started",
+    "file": "/opt/homebrew/opt/nginx/homebrew.nginx.service",
+    "registered": true,
+    "loaded_file": "/Users/alice/Library/LaunchAgents/homebrew.mxcl.nginx.plist"
+  }
+]
