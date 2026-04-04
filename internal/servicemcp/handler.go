@@ -3,6 +3,7 @@ package servicemcp
 import (
 	"context"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/ipolyzos/service-manager-read-mcp/internal/backend"
@@ -23,16 +24,62 @@ const MaxListUnitsLimit = 10000
 type Options struct {
 	// DetectEnv is passed to [detect.Detect] (zero value uses runtime GOOS and exec.LookPath).
 	DetectEnv detect.Environment
+	// NewBackend overrides backend construction (tests). Nil uses the default registry.
+	NewBackend func(domain.ServiceManager) (backend.ServiceManagerBackend, error)
+	// DetectHook replaces [detect.Detect] for handler routing (tests). Nil uses [detect.Detect].
+	DetectHook func(context.Context, detect.Environment) detect.Report
 }
 
 // Handler bridges MCP tools to [detect] and [backend.ServiceManagerBackend] without executing ad-hoc shell.
 type Handler struct {
-	env detect.Environment
+	env        detect.Environment
+	newBackend func(domain.ServiceManager) (backend.ServiceManagerBackend, error)
+	detectHook func(context.Context, detect.Environment) detect.Report
 }
 
 // NewHandler constructs a Handler with the given options.
 func NewHandler(opt Options) *Handler {
-	return &Handler{env: opt.DetectEnv}
+	return &Handler{
+		env:        opt.DetectEnv,
+		newBackend: opt.NewBackend,
+		detectHook: opt.DetectHook,
+	}
+}
+
+func (h *Handler) detectReport(ctx context.Context) detect.Report {
+	if h.detectHook != nil {
+		return h.detectHook(ctx, h.env)
+	}
+	return detect.Detect(ctx, h.env)
+}
+
+// requireManager checks the detection report: known manager, available on host, and capability predicate.
+func (h *Handler) requireManager(ctx context.Context, manager domain.ServiceManager, want func(domain.BackendCapabilities) bool, feature string) error {
+	rep := h.detectReport(ctx)
+	var found *detect.Finding
+	for i := range rep.Findings {
+		if rep.Findings[i].Manager == manager {
+			found = &rep.Findings[i]
+			break
+		}
+	}
+	if found == nil {
+		return fmt.Errorf("%w: unknown manager %q", svcerr.ErrInvalidArgument, manager)
+	}
+	if !found.Applicable || !found.Present {
+		return fmt.Errorf("%w: manager %q is not available on this host", svcerr.ErrBackendUnavailable, manager)
+	}
+	if !want(found.Capabilities) {
+		return fmt.Errorf("%w: %q does not support %s on this host", svcerr.ErrUnsupported, manager, feature)
+	}
+	return nil
+}
+
+func (h *Handler) backendFor(m domain.ServiceManager) (backend.ServiceManagerBackend, error) {
+	if h.newBackend != nil {
+		return h.newBackend(m)
+	}
+	return openBackend(m)
 }
 
 // ListServiceManagers runs PATH-based supervisor discovery (read-only, no subprocess for detection).
@@ -40,7 +87,7 @@ func (h *Handler) ListServiceManagers(ctx context.Context) (detect.Report, error
 	if err := ctx.Err(); err != nil {
 		return detect.Report{}, err
 	}
-	return detect.Detect(ctx, h.env), nil
+	return h.detectReport(ctx), nil
 }
 
 // ListUnits lists units using the library backend for the given manager.
@@ -52,25 +99,58 @@ func (h *Handler) ListUnits(ctx context.Context, manager domain.ServiceManager, 
 	if limit < 0 || limit > MaxListUnitsLimit {
 		return nil, fmt.Errorf("%w: limit must be between 0 and %d", svcerr.ErrInvalidArgument, MaxListUnitsLimit)
 	}
-	rep := detect.Detect(ctx, h.env)
-	var found *detect.Finding
-	for i := range rep.Findings {
-		if rep.Findings[i].Manager == manager {
-			found = &rep.Findings[i]
-			break
-		}
+	if err := h.requireManager(ctx, manager, func(c domain.BackendCapabilities) bool {
+		return c.SupportsListUnits
+	}, "list_units"); err != nil {
+		return nil, err
 	}
-	if found == nil {
-		return nil, fmt.Errorf("%w: unknown manager %q", svcerr.ErrInvalidArgument, manager)
-	}
-	if !found.Applicable || !found.Present || !found.Capabilities.SupportsListUnits {
-		return nil, fmt.Errorf("%w: manager %q is not available on this host", svcerr.ErrBackendUnavailable, manager)
-	}
-	be, err := openBackend(manager)
+	be, err := h.backendFor(manager)
 	if err != nil {
 		return nil, err
 	}
 	return be.ListUnits(ctx, domain.ListUnitsInput{Limit: limit})
+}
+
+// ListFailedServices returns normalized failure rows for one manager. Entries are sorted by
+// (ref.manager, ref.id) for stable MCP output; semantics of “failed” differ by backend (see docs/failed-services.md).
+func (h *Handler) ListFailedServices(ctx context.Context, manager domain.ServiceManager) ([]domain.FailedServiceEntry, error) {
+	if err := ctx.Err(); err != nil {
+		return nil, err
+	}
+	if err := h.requireManager(ctx, manager, func(c domain.BackendCapabilities) bool {
+		return c.SupportsListFailed
+	}, "list_failed_services"); err != nil {
+		return nil, err
+	}
+	be, err := h.backendFor(manager)
+	if err != nil {
+		return nil, err
+	}
+	entries, err := be.ListFailedServices(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return sortFailedServiceEntries(entries), nil
+}
+
+func sortFailedServiceEntries(entries []domain.FailedServiceEntry) []domain.FailedServiceEntry {
+	if len(entries) < 2 {
+		return entries
+	}
+	out := make([]domain.FailedServiceEntry, len(entries))
+	copy(out, entries)
+	sort.Slice(out, func(i, j int) bool {
+		a, b := out[i].Ref, out[j].Ref
+		sa, sb := string(a.Manager), string(b.Manager)
+		if sa != sb {
+			return sa < sb
+		}
+		if a.ID != b.ID {
+			return a.ID < b.ID
+		}
+		return a.DisplayName < b.DisplayName
+	})
+	return out
 }
 
 // ParseServiceManager normalizes user-supplied manager strings to [domain.ServiceManager].

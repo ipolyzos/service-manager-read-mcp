@@ -6,7 +6,9 @@ import (
 	"os/exec"
 	"testing"
 
+	"github.com/ipolyzos/service-manager-read-mcp/internal/backend"
 	"github.com/ipolyzos/service-manager-read-mcp/internal/detect"
+	"github.com/ipolyzos/service-manager-read-mcp/internal/domain"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -35,7 +37,11 @@ func TestRegisterTools_toolMetadata(t *testing.T) {
 	}
 	defer session.Close()
 
-	want := map[string]bool{ToolListServiceManagers: false, ToolListUnits: false}
+	want := map[string]bool{
+		ToolListServiceManagers: false,
+		ToolListUnits:           false,
+		ToolListFailedServices:  false,
+	}
 	for tool, err := range session.Tools(ctx, nil) {
 		if err != nil {
 			t.Fatal(err)
@@ -164,5 +170,195 @@ func TestRegisterTools_listUnitsUnavailableBackend(t *testing.T) {
 	}
 	if !res.IsError {
 		t.Fatal("expected tool error when systemd not on PATH")
+	}
+}
+
+func TestRegisterTools_listFailedServicesValidation(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	h := NewHandler(Options{})
+	srv := mcp.NewServer(&mcp.Implementation{Name: "test", Version: "v0"}, nil)
+	RegisterTools(srv, h)
+
+	st, ct := mcp.NewInMemoryTransports()
+	if _, err := srv.Connect(ctx, st, nil); err != nil {
+		t.Fatal(err)
+	}
+	client := mcp.NewClient(&mcp.Implementation{Name: "c", Version: "v0"}, nil)
+	session, err := client.Connect(ctx, ct, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+
+	_, err = session.CallTool(ctx, &mcp.CallToolParams{
+		Name:      ToolListFailedServices,
+		Arguments: map[string]any{},
+	})
+	if err == nil {
+		t.Fatal("expected JSON-RPC error: input schema requires manager")
+	}
+}
+
+func TestRegisterTools_listFailedServicesSuccess(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	h := NewHandler(Options{
+		DetectHook: func(context.Context, detect.Environment) detect.Report {
+			return reportLinuxSystemd(domain.BackendCapabilities{
+				SupportsListUnits:  true,
+				SupportsListFailed: true,
+			})
+		},
+		NewBackend: func(domain.ServiceManager) (backend.ServiceManagerBackend, error) {
+			return &recordingBackend{
+				caps: domain.BackendCapabilities{
+					Manager:            domain.ManagerSystemd,
+					SupportsListFailed: true,
+				},
+				failed: []domain.FailedServiceEntry{
+					{Ref: domain.UnitRef{Manager: domain.ManagerSystemd, ID: "bad.service"}, Reason: "failed"},
+				},
+			}, nil
+		},
+	})
+	srv := mcp.NewServer(&mcp.Implementation{Name: "test", Version: "v0"}, nil)
+	RegisterTools(srv, h)
+
+	st, ct := mcp.NewInMemoryTransports()
+	if _, err := srv.Connect(ctx, st, nil); err != nil {
+		t.Fatal(err)
+	}
+	client := mcp.NewClient(&mcp.Implementation{Name: "c", Version: "v0"}, nil)
+	session, err := client.Connect(ctx, ct, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+
+	res, err := session.CallTool(ctx, &mcp.CallToolParams{
+		Name:      ToolListFailedServices,
+		Arguments: map[string]any{"manager": "systemd"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.IsError {
+		t.Fatalf("tool error: %#v", res)
+	}
+	raw, err := json.Marshal(res.StructuredContent)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var out ListFailedServicesResult
+	if err := json.Unmarshal(raw, &out); err != nil {
+		t.Fatal(err)
+	}
+	if len(out.Failed) != 1 || out.Failed[0].Ref.ID != "bad.service" {
+		t.Fatalf("unexpected: %#v", out.Failed)
+	}
+}
+
+func TestRegisterTools_listFailedServicesUnsupported(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	h := NewHandler(Options{
+		DetectHook: func(context.Context, detect.Environment) detect.Report {
+			return reportLinuxSystemd(domain.BackendCapabilities{
+				SupportsListUnits:  true,
+				SupportsListFailed: false,
+			})
+		},
+	})
+	srv := mcp.NewServer(&mcp.Implementation{Name: "test", Version: "v0"}, nil)
+	RegisterTools(srv, h)
+
+	st, ct := mcp.NewInMemoryTransports()
+	if _, err := srv.Connect(ctx, st, nil); err != nil {
+		t.Fatal(err)
+	}
+	client := mcp.NewClient(&mcp.Implementation{Name: "c", Version: "v0"}, nil)
+	session, err := client.Connect(ctx, ct, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+
+	res, err := session.CallTool(ctx, &mcp.CallToolParams{
+		Name:      ToolListFailedServices,
+		Arguments: map[string]any{"manager": "systemd"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.IsError {
+		t.Fatal("expected tool error when list_failed unsupported")
+	}
+}
+
+func TestRegisterTools_listFailedServicesUnavailable(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	h := NewHandler(Options{
+		DetectEnv: detect.Environment{
+			GOOS: "linux",
+			LookPath: func(string) (string, error) {
+				return "", exec.ErrNotFound
+			},
+		},
+	})
+	srv := mcp.NewServer(&mcp.Implementation{Name: "test", Version: "v0"}, nil)
+	RegisterTools(srv, h)
+
+	st, ct := mcp.NewInMemoryTransports()
+	if _, err := srv.Connect(ctx, st, nil); err != nil {
+		t.Fatal(err)
+	}
+	client := mcp.NewClient(&mcp.Implementation{Name: "c", Version: "v0"}, nil)
+	session, err := client.Connect(ctx, ct, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+
+	res, err := session.CallTool(ctx, &mcp.CallToolParams{
+		Name:      ToolListFailedServices,
+		Arguments: map[string]any{"manager": "systemd"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.IsError {
+		t.Fatal("expected tool error when manager not on PATH")
+	}
+}
+
+func TestRegisterTools_listFailedServicesNotFoundManagerString(t *testing.T) {
+	t.Parallel()
+	ctx := context.Background()
+	h := NewHandler(Options{})
+	srv := mcp.NewServer(&mcp.Implementation{Name: "test", Version: "v0"}, nil)
+	RegisterTools(srv, h)
+
+	st, ct := mcp.NewInMemoryTransports()
+	if _, err := srv.Connect(ctx, st, nil); err != nil {
+		t.Fatal(err)
+	}
+	client := mcp.NewClient(&mcp.Implementation{Name: "c", Version: "v0"}, nil)
+	session, err := client.Connect(ctx, ct, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+
+	res, err := session.CallTool(ctx, &mcp.CallToolParams{
+		Name:      ToolListFailedServices,
+		Arguments: map[string]any{"manager": "not_a_manager"},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !res.IsError {
+		t.Fatal("expected tool error for invalid manager")
 	}
 }
