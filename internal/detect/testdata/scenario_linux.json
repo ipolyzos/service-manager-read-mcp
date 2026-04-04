@@ -1,0 +1,9 @@
+{
+  "goos": "linux",
+  "paths": {
+    "systemctl": "/usr/bin/systemctl",
+    "rc-service": "",
+    "sv": "/bin/sv",
+    "brew": "/home/linuxbrew/.linuxbrew/bin/brew"
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "goos": "linux",
+  "findings": [
+    {
+      "manager": "brew_services",
+      "applicable": true,
+      "present": true,
+      "resolved_path": "/home/linuxbrew/.linuxbrew/bin/brew",
+      "method": "executable_path",
+      "capabilities": {
+        "manager": "brew_services",
+        "supports_detect": true,
+        "supports_list_units": true,
+        "supports_get_service_status": true,
+        "supports_list_failed_services": false,
+        "supports_get_recent_logs": false
+      }
+    },
+    {
+      "manager": "launchd",
+      "applicable": false,
+      "present": false,
+      "method": "skipped_os",
+      "capabilities": {
+        "manager": "launchd",
+        "supports_detect": false,
+        "supports_list_units": false,
+        "supports_get_service_status": false,
+        "supports_list_failed_services": false,
+        "supports_get_recent_logs": false
+      }
+    },
+    {
+      "manager": "openrc",
+      "applicable": true,
+      "present": false,
+      "method": "executable_path",
+      "capabilities": {
+        "manager": "openrc",
+        "supports_detect": false,
+        "supports_list_units": false,
+        "supports_get_service_status": false,
+        "supports_list_failed_services": false,
+        "supports_get_recent_logs": false
+      }
+    },
+    {
+      "manager": "runit",
+      "applicable": true,
+      "present": true,
+      "resolved_path": "/bin/sv",
+      "method": "executable_path",
+      "capabilities": {
+        "manager": "runit",
+        "supports_detect": true,
+        "supports_list_units": true,
+        "supports_get_service_status": true,
+        "supports_list_failed_services": false,
+        "supports_get_recent_logs": false
+      }
+    },
+    {
+      "manager": "systemd",
+      "applicable": true,
+      "present": true,
+      "resolved_path": "/usr/bin/systemctl",
+      "method": "executable_path",
+      "capabilities": {
+        "manager": "systemd",
+        "supports_detect": true,
+        "supports_list_units": true,
+        "supports_get_service_status": true,
+        "supports_list_failed_services": true,
+        "supports_get_recent_logs": true
+      }
+    }
+  ]
+}

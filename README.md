@@ -14,7 +14,21 @@ Platform tooling this project intends to wrap (where available on the host):
 | launchd (macOS)      | `launchctl` |
 | OpenRC               | `rc-service` |
 | runit                | `sv`        |
-| Homebrew (macOS)     | `brew services` |
+| Homebrew (Linux/macOS) | `brew` / `brew services` |
+
+## Service manager detection
+
+`internal/detect` reports which supervisor CLIs are **visible on `PATH`** for the current host (`GOOS`-gated). It uses **executable resolution only** (via `exec.LookPath`); it does **not** invoke `systemctl`, `launchctl`, `brew`, or other tools during detection.
+
+| Manager   | Binary looked up | Applicable OS targets (coarse)      |
+| --------- | ---------------- | ------------------------------------ |
+| systemd   | `systemctl`      | Linux                                |
+| launchd   | `launchctl`      | macOS                                |
+| OpenRC    | `rc-service`     | Linux, FreeBSD                       |
+| runit     | `sv`             | Linux, BSDs, macOS (if installed)    |
+| Homebrew  | `brew`           | Linux, macOS (Homebrew installs)     |
+
+Each finding includes a `domain.BackendCapabilities` template describing **planned** read-only surface area once a backend exists; presence on PATH does not imply the MCP server can query it yet.
 
 ## Project layout
 
@@ -24,6 +38,7 @@ internal/
   domain/                       # shared types (units, status, logs, capabilities)
   svcerr/                       # typed errors for backends and runners
   runner/                       # argv-only subprocess runner (+ test fake)
+  detect/                       # PATH-based supervisor discovery (no subprocess)
   backend/                      # ServiceManagerBackend interface
   backend/stub/                 # noop backend for wiring tests
 ```
@@ -42,7 +57,7 @@ Subprocess execution for backends is routed through `internal/runner`: build an 
 
 ## Status
 
-Domain model, backend interface, subprocess runner abstraction, and a stub backend are in place. MCP stdio wiring and real supervisor integrations are not implemented yet.
+Domain model, backend interface, allowlisted subprocess runner, PATH-based supervisor detection, and a stub backend are in place. MCP stdio wiring and real supervisor integrations are not implemented yet.
 
 ## License
 
