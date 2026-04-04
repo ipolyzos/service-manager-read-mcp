@@ -1,0 +1,6 @@
+gui/501/com.example.app = {
+	state = running
+	pid = 4242
+	path = /Applications/Example.app
+	last exit code = 0
+}
