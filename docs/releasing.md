@@ -1,12 +1,12 @@
 # Releasing
 
-Lightweight process for tagging **semver** releases. The integration line is **`develop`**; **`main`** tracks what end users should consider stable (see [CONTRIBUTING.md](../CONTRIBUTING.md)).
+Lightweight process for tagging **semver** releases. The integration line is **`develop`**; **`main`** tracks what end users should consider stable (see [contributing.md](contributing.md)).
 
 ## Preconditions
 
 1. **`develop` is green:** required GitHub Actions checks pass.
 2. **Local parity (recommended):** from the repo root, `make ci` (or `./scripts/ci.sh`) succeeds.
-3. **Changelog:** move items from `[Unreleased]` under a new `## [x.y.z] — YYYY-MM-DD` section in [CHANGELOG.md](../CHANGELOG.md), then leave empty `[Unreleased]` scaffolding.
+3. **Changelog:** move items from `[Unreleased]` under a new `## [x.y.z] — YYYY-MM-DD` section in [CHANGELOG.md](CHANGELOG.md), then leave empty `[Unreleased]` scaffolding.
 
 ## Steps
 
@@ -30,4 +30,4 @@ Lightweight process for tagging **semver** releases. The integration line is **`
 
 ## After the first tag
 
-Update the footer links at the bottom of `CHANGELOG.md` if compare URLs need adjusting. For security-sensitive fixes, follow [SECURITY.md](../SECURITY.md).
+Update the footer links at the bottom of `CHANGELOG.md` if compare URLs need adjusting. For security-sensitive fixes, follow [security.md](security.md).

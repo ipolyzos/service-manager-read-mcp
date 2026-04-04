@@ -4,9 +4,11 @@ A **stdio** [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) ser
 
 The server is designed to be **safe by default**: it does not start, stop, or reconfigure services. It wraps common service-manager command-line interfaces so agents and tools can query status and metadata in a consistent shape across platforms.
 
-**Install, versioning, and MCP client setup:** see **[docs/distribution.md](docs/distribution.md)**.
+**Documentation hub:** **[docs/README.md](docs/README.md)** — install, architecture, ADRs, contributing, security, and the full changelog.
 
-**Changelog:** [CHANGELOG.md](CHANGELOG.md) · **Release process:** [docs/releasing.md](docs/releasing.md) · **Security:** [SECURITY.md](SECURITY.md)
+**Install, versioning, and MCP client setup:** **[docs/distribution.md](docs/distribution.md)**.
+
+**Changelog:** [docs/CHANGELOG.md](docs/CHANGELOG.md) · **Release process:** [docs/releasing.md](docs/releasing.md) · **Security:** [docs/security.md](docs/security.md)
 
 ## MCP server (stdio)
 
@@ -65,7 +67,7 @@ go install github.com/ipolyzos/service-manager-read-mcp/cmd/service-manager-read
 
 ### Development and CI
 
-Local checks aligned with GitHub Actions: **`make ci`** or **`./scripts/ci.sh`** (needs **[golangci-lint](https://golangci-lint.run/welcome/install/)** on `PATH`). See **[CONTRIBUTING.md](CONTRIBUTING.md)** for focused targets (`make test-short`, `make test-smoke`) and **[docs/agents.md](docs/agents.md)** for the full step list.
+Local checks aligned with GitHub Actions: **`make ci`** or **`./scripts/ci.sh`** (needs **[golangci-lint](https://golangci-lint.run/welcome/install/)** on `PATH`). See **[docs/contributing.md](docs/contributing.md)** for focused targets (`make test-short`, `make test-smoke`) and **[docs/agents.md](docs/agents.md)** for the full step list.
 
 ### IDE configuration (example)
 
@@ -211,7 +213,7 @@ Subprocess execution for backends is routed through `internal/runner`: build an 
 
 ## Status
 
-MCP **stdio server** exposes **`list_service_managers`**, **`list_units`**, **`list_failed_services`**, **`get_service_status`**, and **`get_recent_service_logs`** (capability-gated per supervisor). Library backends (**systemd**, **launchd**, **OpenRC**, **runit**, **Homebrew services**) and allowlisted execution are the only path to host CLIs. Install: [docs/distribution.md](docs/distribution.md). Releases: [docs/releasing.md](docs/releasing.md). Architecture decisions: [docs/adr/README.md](docs/adr/README.md).
+MCP **stdio server** exposes **`list_service_managers`**, **`list_units`**, **`list_failed_services`**, **`get_service_status`**, and **`get_recent_service_logs`** (capability-gated per supervisor). Library backends (**systemd**, **launchd**, **OpenRC**, **runit**, **Homebrew services**) and allowlisted execution are the only path to host CLIs. Doc index: [docs/README.md](docs/README.md). Install: [docs/distribution.md](docs/distribution.md). Releases: [docs/releasing.md](docs/releasing.md). Architecture decisions: [docs/adr/README.md](docs/adr/README.md).
 
 ## License
 
@@ -219,4 +221,4 @@ Apache License 2.0. See [LICENSE](LICENSE) and [NOTICE](NOTICE).
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). The project uses a [Code of Conduct](CODE_OF_CONDUCT.md) and documents [security reporting](SECURITY.md).
+See [docs/contributing.md](docs/contributing.md). The project uses a [Code of Conduct](docs/code-of-conduct.md) and documents [security reporting](docs/security.md).

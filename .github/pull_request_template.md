@@ -5,6 +5,6 @@
 ## Checklist
 
 - [ ] Target branch is **`develop`**
-- [ ] `make ci` passes locally (or equivalent steps from [CONTRIBUTING.md](../CONTRIBUTING.md))
+- [ ] `make ci` passes locally (or equivalent steps from [docs/contributing.md](../docs/contributing.md))
 - [ ] User-facing behavior or docs updated when needed
-- [ ] **[CHANGELOG.md](CHANGELOG.md)** updated under `[Unreleased]` when the change is user-visible
+- [ ] **[docs/CHANGELOG.md](../docs/CHANGELOG.md)** updated under `[Unreleased]` when the change is user-visible

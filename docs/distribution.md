@@ -83,7 +83,7 @@ Use an **absolute path** to the binary. Example (shape varies by client):
 
 ## Release expectations (maintainers)
 
-- Tag **semver** releases on the integration branch policy the repo uses (see [CONTRIBUTING.md](../CONTRIBUTING.md)).
+- Tag **semver** releases on the integration branch policy the repo uses (see [contributing.md](contributing.md)).
 - Prefer **`make build-release VERSION=x.y.z`** (or CI equivalent) so binaries report a clear semver and commit.
 - Publishing **module** artifacts is via Git tags (`go install …@vx.y.z`); optional GitHub **Releases** with attached binaries are a separate step if the project adopts them later.
 

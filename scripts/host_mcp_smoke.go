@@ -4,7 +4,7 @@
 //
 //	go run ./scripts/host_mcp_smoke.go [-q] [/path/to/service-manager-read-mcp]
 //
-// Default binary: /home/ipolyzos/go/bin/service-manager-read-mcp
+// Default binary: SERVICE_MANAGER_READ_MCP_BIN, else service-manager-read-mcp on PATH, else $HOME/go/bin/service-manager-read-mcp.
 // Use -q for one OK/FAIL line per tool (chat-friendly).
 //
 //go:build ignore
@@ -17,12 +17,27 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
+func defaultBinaryPath() string {
+	if e := os.Getenv("SERVICE_MANAGER_READ_MCP_BIN"); e != "" {
+		return e
+	}
+	if p, err := exec.LookPath("service-manager-read-mcp"); err == nil {
+		return p
+	}
+	home, err := os.UserHomeDir()
+	if err == nil && home != "" {
+		return filepath.Join(home, "go", "bin", "service-manager-read-mcp")
+	}
+	return "service-manager-read-mcp"
+}
+
 func main() {
-	bin := "/home/ipolyzos/go/bin/service-manager-read-mcp"
+	bin := defaultBinaryPath()
 	quiet := false
 	switch {
 	case len(os.Args) > 1 && os.Args[1] == "-q":

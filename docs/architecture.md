@@ -53,4 +53,4 @@ Recorded in [docs/adr/README.md](adr/README.md) (read-only CLI model, stdio MCP,
 
 ## Releases and changelog
 
-Maintainers: [docs/releasing.md](releasing.md). User-visible history: [CHANGELOG.md](../CHANGELOG.md).
+Maintainers: [releasing.md](releasing.md). User-visible history: [CHANGELOG.md](CHANGELOG.md).

@@ -17,4 +17,4 @@ Open pull requests against **`develop`**. **`main`** tracks stable releases.
 
 ## Releases
 
-See [releasing.md](releasing.md) and root [CHANGELOG.md](../CHANGELOG.md).
+See [releasing.md](releasing.md) and [CHANGELOG.md](CHANGELOG.md).
