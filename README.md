@@ -46,29 +46,50 @@ Package `internal/backend/systemd` implements `ServiceManagerBackend` using **`s
 
 **Parsing:** list/failed output expects `systemctl` JSON (array or `{ "units": [...] }`). Journal lines use `-o short-iso`; severities are left as `unknown`. Hosts need compatible systemd/journald versions; failures surface as invocation or parse errors.
 
-## Runit backend
+## Launchd backend
 
-Package `internal/backend/runit` implements `ServiceManagerBackend` via **`runit.New()`** using allowlisted **`sv`** plus a **read-only directory listing** of the runit service tree (names are immediate children of the scan directory).
+Package `internal/backend/launchd` implements `ServiceManagerBackend` via **`launchd.New()`** and the same allowlisted runner. Only `launchctl` is used (`version`, `list`, `print <target>`).
 
-| Operation | Mechanism (summarized) |
-| --------- | ------------------------ |
-| `DetectServiceManager` | `sv -v` stdout must look like **runit** (not BusyBox); rejects ambiguous `sv` implementations |
-| `ListUnits` | `os.ReadDir` on **`SVDIR`** if set and valid, else first of `/var/service`, `/service`, `/etc/service`; `Unit.State` is **`unknown`** until `GetServiceStatus` |
-| `GetServiceStatus` | `sv status <name>` with subprocess **`Dir`** set to the resolved service directory |
-| `ListFailedServices` | One `sv status` per listed service; **heuristic:** line matching `down: <name>: … want up` (supervise wants the service up but it is down) |
-| `GetRecentServiceLogs` | **`ErrUnsupported`** — no bounded, allowlisted per-service log tail via `sv`; `SupportsRecentLogs` is **false** |
+| Operation | CLI (summarized) |
+| --------- | ---------------- |
+| `DetectServiceManager` | `launchctl version` (requires **macOS** / `GOOS=darwin`; otherwise `ErrBackendUnavailable`) |
+| `ListUnits` | `launchctl list` (text columns) |
+| `GetServiceStatus` | `launchctl print` on `gui/<uid>/`, then `user/<uid>/`, then `system/` targets |
+| `ListFailedServices` | Same `list` output; **heuristic:** non-zero **last exit status** column |
+| `GetRecentServiceLogs` | **`ErrUnsupported`** — no safe allowlisted equivalent to per-unit `journalctl`; `Capabilities().SupportsRecentLogs` is **false** |
 
 ### Semantic gaps vs systemd
 
-| Topic | systemd | runit (`sv`) |
-| ----- | -------- | ------------- |
-| Unit list source | `systemctl` JSON | **Filesystem directory** + name validation; not the same as “all units systemd knows” |
-| List row state | Load/active/sub states | **`unknown`** until a status call |
-| Status | `systemctl show` properties | Heuristic parse of **`sv status`** text; PID from `(pid N)` when present |
-| Failed services | Explicit failed units | **`down … want up` only** — ignores clean “down, normally up” and does not see other failure classes |
-| Logs | Bounded `journalctl` | Not exposed here |
+| Topic | systemd backend | launchd backend |
+| ----- | ---------------- | ---------------- |
+| Unit identity | Unit names (e.g. `foo.service`) | Job **labels** (`com.example.app`) |
+| Listing | Typed JSON, all listed service units | Plain `list` for the invoking context; coarse **running** inferred from PID column only |
+| Failed services | Explicit `failed` state from systemd | **Approximation** from list’s last exit status ≠ 0 (not the same as “loaded failed unit”) |
+| Detail view | Rich `systemctl show` properties | Best-effort scan of `launchctl print` key/value lines |
+| Logs | Bounded `journalctl` tail | Not exposed |
 
-`ListFailedServices` may be **slow** on large service directories because it runs **`sv status` once per service**.
+Correctness prefers **honest mapping** and documented limits over forcing identical semantics.
+
+## OpenRC backend
+
+Package `internal/backend/openrc` implements `ServiceManagerBackend` via **`openrc.New()`** using allowlisted **`rc-service`** and **`rc-status`** only.
+
+| Operation | CLI (summarized) |
+| --------- | ---------------- |
+| `DetectServiceManager` | `rc-service -V` (expects “OpenRC” in stdout) |
+| `ListUnits` | `rc-service -l` (one name per line) |
+| `GetServiceStatus` | `rc-service <name> status` (stdout+stderr scanned for started/stopped/crashed) |
+| `ListFailedServices` | `rc-status --crashed` (OpenRC **≥ ~0.45**; older releases return an invocation error) |
+| `GetRecentServiceLogs` | **`ErrUnsupported`** — no safe per-service log tail; `SupportsRecentLogs` is **false** |
+
+### Differences vs systemd
+
+| Topic | systemd | OpenRC (`rc-service`) |
+| ----- | -------- | --------------------- |
+| Listing | JSON with load/active/sub | **Names only**; `Unit.State` is **`unknown`** until `GetServiceStatus` |
+| Status | Structured `systemctl show` | Heuristic string match on `status` output; non-zero exit may still mean “stopped” (handled) |
+| Failed | `systemctl` failed units | **`rc-status --crashed`** only — not the same as systemd’s failure model |
+| Logs | `journalctl` | Not implemented here |
 
 ## Project layout
 
@@ -82,7 +103,8 @@ internal/
   backend/                      # ServiceManagerBackend interface
   backend/stub/                 # noop backend for wiring tests
   backend/systemd/              # systemd/journald backend (allowlisted CLIs)
-  backend/runit/                # runit backend (allowlisted sv + service dir scan)
+  backend/launchd/              # launchd backend (allowlisted launchctl)
+  backend/openrc/               # OpenRC backend (rc-service / rc-status)
 ```
 
 ## Development
@@ -99,7 +121,7 @@ Subprocess execution for backends is routed through `internal/runner`: build an 
 
 ## Status
 
-Domain model, backend interface, allowlisted subprocess runner, PATH-based supervisor detection, a stub backend, **systemd**, and **runit** backends (library only) are in place. MCP stdio wiring and other supervisor backends are not implemented yet.
+Domain model, backend interface, allowlisted subprocess runner, PATH-based supervisor detection, a stub backend, **systemd**, **launchd**, and **OpenRC** backends (library only) are in place. MCP stdio wiring and remaining supervisors are not implemented yet.
 
 ## License
 
