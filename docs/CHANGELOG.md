@@ -9,9 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Dependabot** ([`.github/dependabot.yml`](../.github/dependabot.yml)): weekly PRs for **Go modules** and **GitHub Actions** (actions grouped).
+- **Release workflow** ([`.github/workflows/release.yml`](../.github/workflows/release.yml)): on **`v*`** tags, runs **`ci-verify`** then **`gh release create --generate-notes`** (documented in [releasing.md](releasing.md)).
+- **`scripts/golangci-version`**: single source for the **golangci-lint** version used by CI and documented for contributors.
+
 ### Changed
 
-### Fixed
+- **CI** is factored into a reusable **`.github/workflows/ci-verify.yml`**; **`.github/workflows/ci.yml`** calls it unchanged for contributors.
+- **`./scripts/ci.sh`**: checks **Go** vs **`go.mod`** before lint; prints install hints for the pinned **golangci-lint** on failure.
+- **Docs** — **[contributing.md](contributing.md)** (**Local toolchain**), **[agents.md](agents.md)**, **[repository-layout.md](repository-layout.md)**, **[releasing.md](releasing.md)**, **[mcp-tools.md](mcp-tools.md)**: CI/release layout and automation.
 
 ## [0.1.5] — 2026-04-04
 
