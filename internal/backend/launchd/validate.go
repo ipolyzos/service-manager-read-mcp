@@ -22,6 +22,11 @@ func LabelParam(name string) runner.ParamRule {
 	}
 }
 
+// ValidateServiceQueryID applies the same rules as [LabelParam] for read-only queries (job label only).
+func ValidateServiceQueryID(s string) error {
+	return validateLabel(s)
+}
+
 func validateLabel(s string) error {
 	if s == "" {
 		return fmt.Errorf("empty label")

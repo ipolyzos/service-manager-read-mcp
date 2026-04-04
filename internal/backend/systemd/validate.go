@@ -21,6 +21,11 @@ func UnitNameParam(name string) runner.ParamRule {
 	}
 }
 
+// ValidateServiceQueryID applies the same rules as [UnitNameParam] for read-only queries.
+func ValidateServiceQueryID(s string) error {
+	return validateUnitName(s)
+}
+
 func validateUnitName(s string) error {
 	if s == "" {
 		return fmt.Errorf("empty unit name")
