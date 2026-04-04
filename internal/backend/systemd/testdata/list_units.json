@@ -1,0 +1,16 @@
+[
+  {
+    "unit": "nginx.service",
+    "load": "loaded",
+    "active": "active",
+    "sub": "running",
+    "description": "nginx HTTP server"
+  },
+  {
+    "unit": "dbus.service",
+    "load": "loaded",
+    "active": "inactive",
+    "sub": "dead",
+    "description": "D-Bus"
+  }
+]

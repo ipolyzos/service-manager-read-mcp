@@ -30,6 +30,22 @@ Platform tooling this project intends to wrap (where available on the host):
 
 Each finding includes a `domain.BackendCapabilities` template describing **planned** read-only surface area once a backend exists; presence on PATH does not imply the MCP server can query it yet.
 
+## Systemd backend
+
+Package `internal/backend/systemd` implements `ServiceManagerBackend` using **`systemd.New()`** and the shared allowlisted runner (`SafeRunner` + `Exec`). All argv is defined in code; unit names and journal line counts are validated before invocation.
+
+| Operation | CLI (summarized) |
+| --------- | ---------------- |
+| `DetectServiceManager` | `systemctl show systemd --property=Id` |
+| `ListUnits` | `systemctl list-units --type=service --all -o json` |
+| `GetServiceStatus` | `systemctl show <unit>` (fixed property set) |
+| `ListFailedServices` | `systemctl list-units --state=failed --type=service -o json` |
+| `GetRecentServiceLogs` | `journalctl -o short-iso -n <N> -u <unit>` |
+
+**Limits:** log tail uses `MaxLines` (default 100, capped at 500). **`RecentLogsInput.Since` is not implemented** and returns `ErrUnsupported` until a safe allowlisted `--since` path exists.
+
+**Parsing:** list/failed output expects `systemctl` JSON (array or `{ "units": [...] }`). Journal lines use `-o short-iso`; severities are left as `unknown`. Hosts need compatible systemd/journald versions; failures surface as invocation or parse errors.
+
 ## Project layout
 
 ```
@@ -41,6 +57,7 @@ internal/
   detect/                       # PATH-based supervisor discovery (no subprocess)
   backend/                      # ServiceManagerBackend interface
   backend/stub/                 # noop backend for wiring tests
+  backend/systemd/              # systemd/journald backend (allowlisted CLIs)
 ```
 
 ## Development
@@ -57,7 +74,7 @@ Subprocess execution for backends is routed through `internal/runner`: build an 
 
 ## Status
 
-Domain model, backend interface, allowlisted subprocess runner, PATH-based supervisor detection, and a stub backend are in place. MCP stdio wiring and real supervisor integrations are not implemented yet.
+Domain model, backend interface, allowlisted subprocess runner, PATH-based supervisor detection, a stub backend, and a **systemd** backend (library only) are in place. MCP stdio wiring and other supervisor backends are not implemented yet.
 
 ## License
 

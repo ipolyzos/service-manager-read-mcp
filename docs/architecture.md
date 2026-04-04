@@ -20,7 +20,8 @@
 | `internal/detect` | `GOOS`-gated `exec.LookPath` discovery for known supervisor CLIs; emits `Report` with `Finding` + `BackendCapabilities` templates. No subprocess execution. |
 | `runner.Registry` / `SafeRunner` | Map `Invocation` → validated `Spec`; sole supported entry for untrusted inputs. |
 | `runner.Runner` (`Exec`, `Func`) | Execute `Spec`; `Func` is the test double. |
-| `internal/backend` (future) | Map domain operations to `CommandID` + params; parse stdout/stderr into domain structs. |
+| `internal/backend/systemd` | Allowlisted `systemctl` / `journalctl` recipes; parsers map JSON / key=value / journal short-iso into domain types. |
+| `internal/backend` (other) | Additional supervisors map domain operations to `CommandID` + params. |
 | MCP surface (future) | JSON-RPC over stdio; maps tool calls to backend operations. |
 
 ## Testing strategy
