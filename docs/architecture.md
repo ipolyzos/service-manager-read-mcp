@@ -21,7 +21,8 @@
 | `runner.Registry` / `SafeRunner` | Map `Invocation` → validated `Spec`; sole supported entry for untrusted inputs. |
 | `runner.Runner` (`Exec`, `Func`) | Execute `Spec`; `Func` is the test double. |
 | `internal/backend/systemd` | Allowlisted `systemctl` / `journalctl` recipes; parsers map JSON / key=value / journal short-iso into domain types. |
-| `internal/backend/brew` | Allowlisted `brew --version`, `brew services list --json`, `brew services info <formula> --json`; JSON parsers; list-derived failed heuristic. |
+| `internal/backend/launchd` | Allowlisted `launchctl` (`version`, `list`, `print`); text/print parsers; failed list is list-based heuristic; logs unsupported. |
+| `internal/backend/openrc` | Allowlisted `rc-service` (`-V`, `-l`, `<name> status`) and `rc-status --crashed`; text parsers; list has no runtime state; logs unsupported. |
 | `internal/backend` (other) | Additional supervisors map domain operations to `CommandID` + params. |
 | MCP surface (future) | JSON-RPC over stdio; maps tool calls to backend operations. |
 
