@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **[recent-logs.md](recent-logs.md)**: clarify that **`recent_window`** is only effective when empty or **`0`**; non-zero values are validated then rejected as **unsupported** until a safe time filter exists.
+
 ## [0.1.6] — 2026-04-04
 
 ### Added

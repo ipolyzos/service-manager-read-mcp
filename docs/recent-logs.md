@@ -9,13 +9,13 @@ The MCP tool `get_recent_service_logs` returns a **bounded, non-streaming** list
 | `manager` | Same supervisor key as other tools (`systemd`, `launchd`, …). |
 | `service` | Unit / service identifier for that manager (same validation as backend argv). |
 | `max_lines` | Maximum lines to return. **0** means default **100**. Hard cap **500** at the MCP boundary. |
-| `recent_window` | Optional Go [`time.ParseDuration`](https://pkg.go.dev/time#ParseDuration) string (e.g. `1h`, `30m`). **Empty** or **`0`** means *line-bounded tail only* (no time window). Parsed durations are capped at **7 days** (`168h`). |
+| `recent_window` | **Use empty or `0` only.** That selects a **line-bounded tail** (`max_lines` / journal `-n`); no time filter is applied today. A non-empty, non-zero value is checked by [`ParseRecentLogsBounds`](../internal/servicemcp/logs_validate.go) (valid Go duration syntax; values above **7 days** / `168h` are rejected as invalid), but the MCP handler then returns **`unsupported`** — there is **no** allowlisted `journalctl --since` (or equivalent) path yet, so **no** time window actually runs. |
 
 ## Current backend support
 
 | Manager | `supports_get_recent_logs` | Behavior |
 | ------- | -------------------------- | -------- |
-| **systemd** | yes | Allowlisted `journalctl` tail (`-n`, `-u`). `RecentLogsInput.Since` is **not** wired; **`recent_window` must be empty or `0`** — non-zero returns `ErrUnsupported` from the MCP handler until a safe `--since` path is allowlisted. |
+| **systemd** | yes | Allowlisted `journalctl` tail (`-n`, `-u`). Time-bounded windows are **not** implemented; see **`recent_window`** in the table above. |
 | **launchd**, **OpenRC**, **runit**, **brew** | no | Tool fails with **`operation unsupported`** when discovery reports logs off (read-only; no shell). |
 
 ## Truncation
