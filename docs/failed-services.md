@@ -1,5 +1,7 @@
 # Failed services semantics (`list_failed_services`)
 
+Use `list_service_managers` to confirm the supervisor is on `PATH` and exposes `supports_list_failed_services`. Manager string values match the README MCP section.
+
 The MCP tool `list_failed_services` returns `domain.FailedServiceEntry` rows (`ref`, optional `reason`, optional `since`). All backends use the same JSON shape; **what counts as “failed” is not identical** across supervisors.
 
 | Manager | Source | Meaning (summary) |
