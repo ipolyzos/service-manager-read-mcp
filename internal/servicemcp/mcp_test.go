@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/ipolyzos/service-manager-read-mcp/internal/backend"
@@ -129,12 +130,18 @@ func TestRegisterTools_listUnitsValidation(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = session.Close() })
 
-	_, err = session.CallTool(ctx, &mcp.CallToolParams{
+	res, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name:      ToolListUnits,
 		Arguments: map[string]any{},
 	})
-	if err == nil {
-		t.Fatal("expected JSON-RPC error: input schema requires manager")
+	if err != nil {
+		t.Fatalf("unexpected JSON-RPC error: %v", err)
+	}
+	if res == nil || !res.IsError {
+		t.Fatal("expected tool error result for missing required manager (MCP: IsError)")
+	}
+	if msg := callToolResultErrorText(res); !strings.Contains(msg, "validating") && !strings.Contains(msg, "manager") {
+		t.Fatalf("unexpected validation message: %q", msg)
 	}
 }
 
@@ -193,12 +200,18 @@ func TestRegisterTools_listFailedServicesValidation(t *testing.T) {
 	}
 	t.Cleanup(func() { _ = session.Close() })
 
-	_, err = session.CallTool(ctx, &mcp.CallToolParams{
+	res, err := session.CallTool(ctx, &mcp.CallToolParams{
 		Name:      ToolListFailedServices,
 		Arguments: map[string]any{},
 	})
-	if err == nil {
-		t.Fatal("expected JSON-RPC error: input schema requires manager")
+	if err != nil {
+		t.Fatalf("unexpected JSON-RPC error: %v", err)
+	}
+	if res == nil || !res.IsError {
+		t.Fatal("expected tool error result for missing required manager (MCP: IsError)")
+	}
+	if msg := callToolResultErrorText(res); !strings.Contains(msg, "validating") && !strings.Contains(msg, "manager") {
+		t.Fatalf("unexpected validation message: %q", msg)
 	}
 }
 
@@ -507,4 +520,18 @@ func TestRegisterTools_getRecentServiceLogsRecentWindowRejected(t *testing.T) {
 	if !res.IsError {
 		t.Fatal("expected unsupported error for recent_window")
 	}
+}
+
+// callToolResultErrorText joins TextContent from a tool error result (client-side).
+func callToolResultErrorText(res *mcp.CallToolResult) string {
+	if res == nil {
+		return ""
+	}
+	var b strings.Builder
+	for _, c := range res.Content {
+		if tc, ok := c.(*mcp.TextContent); ok {
+			b.WriteString(tc.Text)
+		}
+	}
+	return b.String()
 }
